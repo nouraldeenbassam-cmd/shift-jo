@@ -33,7 +33,7 @@
   .brand .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
   .brand .name span{ color:var(--blue); }
 
-  h1{ font-size:clamp(30px,5vw,46px); font-weight:900; line-height:1.2; margin-top:24px; letter-spacing:-0.01em; }
+  h1{ font-size:clamp(30px,5vw,46px); font-weight:900; line-height:1.2; margin-top:22px; letter-spacing:-0.01em; }
   h1 em{ font-style:normal; color:var(--green); }
   .lead{ color:var(--text-dim); font-size:15.5px; max-width:540px; margin-top:12px; line-height:1.75; }
 
@@ -69,12 +69,24 @@
   .checks label{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim); flex-direction:row-reverse; }
   .checks input{ width:auto; }
 
-  .submit-btn{
+  .btn{
     width:100%; background:var(--blue); color:#fff; border:none; padding:12px;
     font-weight:700; font-size:14.5px; border-radius:8px; cursor:pointer; margin-top:4px;
   }
-  .submit-btn:hover{ background:var(--blue-dark); }
-  .form-msg{ font-size:12px; color:var(--green-dark); margin-top:10px; display:none; font-weight:500; }
+  .btn:hover{ background:var(--blue-dark); }
+  .btn.secondary{ background:transparent; color:var(--text-dim); border:1px solid var(--border-strong); }
+  .btn.secondary:hover{ background:var(--bg); }
+  .form-msg{ font-size:12px; margin-top:10px; display:none; font-weight:500; line-height:1.6; }
+  .form-msg.ok{ color:var(--green-dark); }
+  .form-msg.err{ color:var(--coral); }
+
+  .tabs{ display:flex; gap:6px; margin-bottom:16px; background:var(--bg); border-radius:8px; padding:4px; }
+  .tab{ flex:1; text-align:center; padding:8px; font-size:13px; font-weight:600; color:var(--text-dim); border-radius:6px; cursor:pointer; }
+  .tab.active{ background:var(--card); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+
+  .who-badge{ display:flex; align-items:center; justify-content:space-between; background:var(--bg); border-radius:8px; padding:10px 12px; margin-bottom:16px; }
+  .who-badge span{ font-size:13px; font-weight:600; }
+  .who-badge button{ background:none; border:none; color:var(--coral); font-size:12px; cursor:pointer; font-weight:600; }
 
   .board-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
   .board-head h2{ font-size:17px; font-weight:700; }
@@ -101,9 +113,10 @@
   .job .wage{ font-weight:700; color:var(--text); font-size:14px; }
   .job .apply{
     background:var(--green); color:#fff; padding:7px 16px; border-radius:8px;
-    font-size:12.5px; text-decoration:none; font-weight:600;
+    font-size:12.5px; text-decoration:none; font-weight:600; border:none; cursor:pointer;
   }
   .job .apply:hover{ background:var(--green-dark); }
+  .job .del{ background:none; border:none; color:var(--coral); font-size:11.5px; cursor:pointer; font-weight:600; }
 
   .empty{ text-align:center; padding:50px 20px; color:var(--text-dim); font-size:13px; border:1px dashed var(--border-strong); border-radius:12px; }
 
@@ -123,44 +136,89 @@
       <div class="stat"><b id="statCats">0</b><span>مجال</span></div>
     </div>
 
-    <a href="#jobForm" style="display:inline-block; margin-top:16px; font-size:13px; color:var(--blue-dark); font-weight:600; text-decoration:none;">عندك شركة وبدك تنشر طلب؟ انشر من هون ↓</a>
+    <a href="#authPanel" style="display:inline-block; margin-top:16px; font-size:13px; color:var(--blue-dark); font-weight:600; text-decoration:none;">عندك شركة وبدك تنشر طلب؟ سجل من هون ↓</a>
   </header>
 
   <div class="split">
-    <div class="panel">
-      <h2>انشر طلب عمال</h2>
-      <div class="hint">شركة أو مصنع؟ عبّي الفورم وطلبك بيظهر باللوحة فوراً.</div>
-      <form id="jobForm">
-        <div class="field"><label>اسم الشركة</label><input type="text" id="fCompany" required placeholder="مثال: مطعم الحارة"></div>
-        <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
-        <div class="field"><label>المجال</label>
-          <select id="fCategory">
-            <option>عمالة يدوية</option>
-            <option selected>تقنية / IT</option>
-            <option>إداري / مكتبي</option>
-            <option>ضيافة / مطاعم</option>
-            <option>تعليم / تدريب</option>
-            <option>تصميم / محتوى</option>
-            <option>أخرى</option>
-          </select>
+    <div class="panel" id="authPanel">
+
+      <!-- Logged out: login/signup -->
+      <div id="authForms">
+        <div class="tabs">
+          <div class="tab active" id="tabLogin">تسجيل دخول</div>
+          <div class="tab" id="tabSignup">حساب جديد</div>
         </div>
-        <div class="field row2">
-          <div><label>المدة (بالأيام)</label><select id="fDuration"></select></div>
-          <div><label>المدينة</label>
-            <select id="fCity"><option>عمّان</option><option>الزرقاء</option><option>إربد</option><option>العقبة</option></select>
+
+        <form id="loginForm">
+          <div class="field"><label>الإيميل</label><input type="email" id="loginEmail" required></div>
+          <div class="field"><label>كلمة السر</label><input type="password" id="loginPassword" required></div>
+          <button type="submit" class="btn">تسجيل دخول</button>
+          <div class="form-msg" id="loginMsg"></div>
+        </form>
+
+        <form id="signupForm" style="display:none;">
+          <div class="field"><label>نوع الحساب</label>
+            <select id="signupType">
+              <option value="company">شركة (بدي أنشر وظائف)</option>
+              <option value="worker">عامل (بدي أدوّر شغل)</option>
+            </select>
           </div>
+          <div class="field"><label>الاسم / اسم الشركة</label><input type="text" id="signupName" required></div>
+          <div class="field"><label>الإيميل</label><input type="email" id="signupEmail" required></div>
+          <div class="field"><label>كلمة السر</label><input type="password" id="signupPassword" required minlength="6"></div>
+          <button type="submit" class="btn">إنشاء حساب</button>
+          <div class="form-msg" id="signupMsg"></div>
+        </form>
+      </div>
+
+      <!-- Logged in -->
+      <div id="loggedInPanel" style="display:none;">
+        <div class="who-badge">
+          <span id="whoName"></span>
+          <button id="logoutBtn">خروج</button>
         </div>
-        <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="5"></div>
-        <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage" placeholder="مثال: 15 د.أ /يوم"></div>
-        <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
-        <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
-        <div class="checks">
-          <label><input type="checkbox" id="fUrgent">مستعجل</label>
-          <label><input type="checkbox" id="fSkilled">يتطلب شهادة/تخصص</label>
+
+        <div id="companyPostArea" style="display:none;">
+          <h2>انشر طلب عمال</h2>
+          <div class="hint">طلبك بيظهر مباشرة بالموقع لكل الزوار.</div>
+          <form id="jobForm">
+            <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
+            <div class="field"><label>المجال</label>
+              <select id="fCategory">
+                <option>عمالة يدوية</option>
+                <option selected>تقنية / IT</option>
+                <option>إداري / مكتبي</option>
+                <option>ضيافة / مطاعم</option>
+                <option>تعليم / تدريب</option>
+                <option>تصميم / محتوى</option>
+                <option>أخرى</option>
+              </select>
+            </div>
+            <div class="field row2">
+              <div><label>المدة (بالأيام)</label><select id="fDuration"></select></div>
+              <div><label>المدينة</label>
+                <select id="fCity"><option>عمّان</option><option>الزرقاء</option><option>إربد</option><option>العقبة</option></select>
+              </div>
+            </div>
+            <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="5"></div>
+            <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage" placeholder="مثال: 15 د.أ /يوم"></div>
+            <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
+            <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
+            <div class="checks">
+              <label><input type="checkbox" id="fUrgent">مستعجل</label>
+              <label><input type="checkbox" id="fSkilled">يتطلب شهادة/تخصص</label>
+            </div>
+            <button type="submit" class="btn">انشر الطلب</button>
+            <div class="form-msg" id="formMsg"></div>
+          </form>
         </div>
-        <button type="submit" class="submit-btn">انشر الطلب</button>
-        <div class="form-msg" id="formMsg">✓ تم إضافة طلبك للوحة تحت.</div>
-      </form>
+
+        <div id="workerArea" style="display:none;">
+          <h2>أهلاً فيك 👋</h2>
+          <div class="hint">تصفح الشواغر المتاحة تحت، واتصل مباشرة بأي وظيفة تناسبك.</div>
+        </div>
+      </div>
+
     </div>
 
     <div class="board-wrap">
@@ -176,10 +234,20 @@
     </div>
   </div>
 
-  <footer>نموذج أولي (MVP) — الطلبات المنشورة هون بتضل بس أثناء الجلسة الحالية.</footer>
+  <footer>شفت / Shift — منصة الشغل المؤقت</footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ===== Supabase setup =====
+const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+
+// ===== Duration dropdown =====
 const fDuration = document.getElementById('fDuration');
 fDuration.innerHTML = Array.from({length:30}, (_,i)=> i+1).map(d => `<option value="${d}" ${d===7?'selected':''}>${d} ${d===1?'يوم':'أيام'}</option>`).join('');
 
@@ -191,17 +259,130 @@ function bucketFor(days){
   return '15-30 يوم';
 }
 
-let jobs = [
-  { company:"مصنع اسمنت الشمال", title:"عمال تحميل وتفريغ", category:"عمالة يدوية", duration:7, city:"الزرقاء", count:10, wage:"16 د.أ /يوم", phone:"079XXXXXXX", desc:"دوام 7 صباحاً - 3 عصراً، النقل من الموقع متوفر.", urgent:true, skilled:false },
-  { company:"مكتب محاماة الوسط", title:"مختص دعم IT ليومين", category:"تقنية / IT", duration:2, city:"عمّان", count:1, wage:"40 د.أ /يوم", phone:"079XXXXXXX", desc:"تركيب شبكة صغيرة وإعداد أجهزة المكتب الجديدة.", urgent:false, skilled:true },
-  { company:"مطعم الحارة", title:"طلاب لخدمة الطاولات — عطلة نهاية أسبوع", category:"ضيافة / مطاعم", duration:3, city:"عمّان", count:5, wage:"12 د.أ /يوم + بقشيش", phone:"077XXXXXXX", desc:"مناسب لطلاب الجامعة، دوام مسائي فقط.", urgent:false, skilled:false },
-  { company:"مستودع الأمانة للتوزيع", title:"عمال فرز وتعبئة طرود", category:"عمالة يدوية", duration:3, city:"عمّان", count:6, wage:"14 د.أ /يوم", phone:"078XXXXXXX", desc:"موسم ذروة، خبرة بسيطة بالفرز تفضل.", urgent:false, skilled:false },
-  { company:"استوديو نقطة تصميم", title:"مصمم جرافيك لحملة قصيرة", category:"تصميم / محتوى", duration:7, city:"عمّان", count:1, wage:"250 د.أ إجمالي", phone:"079XXXXXXX", desc:"تصميم هوية بصرية لحملة إعلانية، تسليم خلال أسبوع.", urgent:false, skilled:true },
-  { company:"مركز تدريب المستقبل", title:"مدرّب دورة إكسل مكثفة", category:"تعليم / تدريب", duration:1, city:"إربد", count:1, wage:"70 د.أ /يوم", phone:"077XXXXXXX", desc:"تدريب موظفين شركة على Excel المتقدم ليوم واحد.", urgent:false, skilled:true },
-  { company:"محطة حاويات العقبة", title:"عمال تنزيل بضاعة", category:"عمالة يدوية", duration:1, city:"العقبة", count:15, wage:"20 د.أ /يوم", phone:"078XXXXXXX", desc:"شغل ليوم واحد فقط، دفع فوري نهاية الدوام.", urgent:true, skilled:false },
-  { company:"شركة تجارة إلكترونية", title:"مدخل بيانات مؤقت", category:"إداري / مكتبي", duration:14, city:"عمّان", count:2, wage:"18 د.أ /يوم", phone:"079XXXXXXX", desc:"إدخال بيانات منتجات على نظام المخزون، دوام صباحي.", urgent:false, skilled:false },
-];
+// ===== Tabs (login / signup) =====
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+tabLogin.onclick = () => { tabLogin.classList.add('active'); tabSignup.classList.remove('active'); loginForm.style.display='block'; signupForm.style.display='none'; };
+tabSignup.onclick = () => { tabSignup.classList.add('active'); tabLogin.classList.remove('active'); signupForm.style.display='block'; loginForm.style.display='none'; };
 
+// ===== Signup =====
+document.getElementById('signupForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('signupMsg');
+  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري إنشاء الحساب...';
+
+  const email = document.getElementById('signupEmail').value;
+  const password = document.getElementById('signupPassword').value;
+  const accountType = document.getElementById('signupType').value;
+  const fullName = document.getElementById('signupName').value;
+
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { account_type: accountType, full_name: fullName } }
+  });
+
+  if(error){
+    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
+    return;
+  }
+
+  // create profile row
+  if(data.user){
+    await sb.from('profiles').insert({ id: data.user.id, account_type: accountType, full_name: fullName });
+  }
+
+  msg.className='form-msg ok';
+  msg.textContent = '✓ تم إنشاء الحساب! تحقق من إيميلك واضغط رابط التفعيل قبل ما تسجل دخول.';
+  this.reset();
+});
+
+// ===== Login =====
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('loginMsg');
+  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري تسجيل الدخول...';
+
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+  if(error){
+    msg.className='form-msg err';
+    msg.textContent = error.message.includes('Email not confirmed')
+      ? 'لازم تفعّل إيميلك أولاً — تحقق من صندوق الوارد.'
+      : 'خطأ: تأكد من الإيميل وكلمة السر.';
+    return;
+  }
+  msg.style.display='none';
+  await loadSession();
+});
+
+// ===== Logout =====
+document.getElementById('logoutBtn').onclick = async () => {
+  await sb.auth.signOut();
+  await loadSession();
+};
+
+// ===== Session / UI switching =====
+async function loadSession(){
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session ? session.user : null;
+
+  if(!currentUser){
+    document.getElementById('authForms').style.display = 'block';
+    document.getElementById('loggedInPanel').style.display = 'none';
+    currentProfile = null;
+    return;
+  }
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = profile;
+
+  document.getElementById('authForms').style.display = 'none';
+  document.getElementById('loggedInPanel').style.display = 'block';
+
+  const isCompany = profile && profile.account_type === 'company';
+  document.getElementById('companyPostArea').style.display = isCompany ? 'block' : 'none';
+  document.getElementById('workerArea').style.display = isCompany ? 'none' : 'block';
+  document.getElementById('whoName').textContent = (profile ? profile.full_name : currentUser.email) + (isCompany ? ' (شركة)' : ' (عامل)');
+}
+
+// ===== Post job =====
+document.getElementById('jobForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('formMsg');
+  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري النشر...';
+
+  const newJob = {
+    company_id: currentUser.id,
+    company_name: currentProfile ? currentProfile.full_name : currentUser.email,
+    title: document.getElementById('fTitle').value,
+    category: document.getElementById('fCategory').value,
+    duration: Number(document.getElementById('fDuration').value),
+    city: document.getElementById('fCity').value,
+    count: document.getElementById('fCount').value || 1,
+    wage: document.getElementById('fWage').value,
+    phone: document.getElementById('fPhone').value,
+    job_desc: document.getElementById('fDesc').value,
+    urgent: document.getElementById('fUrgent').checked,
+    skilled: document.getElementById('fSkilled').checked
+  };
+
+  const { error } = await sb.from('jobs').insert(newJob);
+  if(error){
+    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
+    return;
+  }
+  msg.className='form-msg ok'; msg.textContent = '✓ تم نشر الوظيفة بنجاح.';
+  this.reset();
+  document.getElementById('fDuration').value = '7';
+  await loadJobs();
+});
+
+// ===== Load + render jobs =====
 const jobList = document.getElementById('jobList');
 const filterCity = document.getElementById('filterCity');
 const filterDuration = document.getElementById('filterDuration');
@@ -209,6 +390,8 @@ const filterCategory = document.getElementById('filterCategory');
 const statJobs = document.getElementById('statJobs');
 const statCities = document.getElementById('statCities');
 const statCats = document.getElementById('statCats');
+
+let jobs = [];
 
 function unique(arr){ return [...new Set(arr)]; }
 
@@ -236,7 +419,7 @@ function render(){
       <div class="top-row">
         <div>
           <h3>${j.title}</h3>
-          <div class="co">${j.company}</div>
+          <div class="co">${j.company_name || ''}</div>
           <div class="badges">
             <span class="badge dur">${j.duration} ${j.duration==1?'يوم':'أيام'}</span>
             <span class="badge cat">${j.category}</span>
@@ -245,45 +428,39 @@ function render(){
           </div>
         </div>
       </div>
-      <div class="desc">${j.desc || ''}</div>
+      <div class="desc">${j.job_desc || ''}</div>
       <div class="bottom-row">
         <span class="wage">${j.wage || '—'} · ${j.city}</span>
         <a href="tel:${j.phone}" class="apply">اتصل الآن</a>
       </div>
+      ${currentUser && j.company_id === currentUser.id ? `<div style="margin-top:8px; text-align:left;"><button class="del" data-id="${j.id}">حذف الوظيفة</button></div>` : ''}
     </div>
   `).join('');
+
+  document.querySelectorAll('.del').forEach(btn => {
+    btn.onclick = async () => {
+      await sb.from('jobs').delete().eq('id', btn.dataset.id);
+      await loadJobs();
+    };
+  });
 }
 
-document.getElementById('jobForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  const newJob = {
-    company: document.getElementById('fCompany').value,
-    title: document.getElementById('fTitle').value,
-    category: document.getElementById('fCategory').value,
-    duration: Number(document.getElementById('fDuration').value),
-    city: document.getElementById('fCity').value,
-    count: document.getElementById('fCount').value || 1,
-    wage: document.getElementById('fWage').value,
-    phone: document.getElementById('fPhone').value,
-    desc: document.getElementById('fDesc').value,
-    urgent: document.getElementById('fUrgent').checked,
-    skilled: document.getElementById('fSkilled').checked
-  };
-  jobs.unshift(newJob);
-  populateFilters();
-  render();
-  this.reset();
-  document.getElementById('fDuration').value = '7';
-  const msg = document.getElementById('formMsg');
-  msg.style.display = 'block';
-  setTimeout(()=> msg.style.display='none', 3500);
-  window.scrollTo({top: document.querySelector('.split').offsetTop - 20, behavior:'smooth'});
-});
+async function loadJobs(){
+  const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
+  if(!error && data){
+    jobs = data;
+    populateFilters();
+    render();
+  }
+}
 
 [filterCity, filterDuration, filterCategory].forEach(el => el.addEventListener('change', render));
 
-populateFilters();
-render();
+// ===== Init =====
+(async function init(){
+  await loadSession();
+  await loadJobs();
+})();
 </script>
 </body>
 </html>
