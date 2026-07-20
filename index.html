@@ -185,8 +185,8 @@
             <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
             <div class="field"><label>المجال</label>
               <select id="fCategory">
-                <option>عمالة يدوية</option>
-                <option selected>تقنية / IT</option>
+                <option selected>عمالة يدوية</option>
+                <option>تقنية / IT</option>
                 <option>إداري / مكتبي</option>
                 <option>ضيافة / مطاعم</option>
                 <option>تعليم / تدريب</option>
@@ -195,12 +195,33 @@
               </select>
             </div>
             <div class="field row2">
-              <div><label>المدة (بالأيام)</label><select id="fDuration"></select></div>
+              <div><label>المدة</label>
+                <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <input type="number" id="fDurationNum" min="1" value="1">
+                  <select id="fDurationUnit">
+                    <option value="ساعات">ساعات</option>
+                    <option value="أيام" selected>أيام</option>
+                  </select>
+                </div>
+              </div>
               <div><label>المدينة</label>
-                <select id="fCity"><option>عمّان</option><option>الزرقاء</option><option>إربد</option><option>العقبة</option></select>
+                <select id="fCity">
+                  <option>عمّان</option>
+                  <option>إربد</option>
+                  <option>البلقاء</option>
+                  <option>جرش</option>
+                  <option>الزرقاء</option>
+                  <option>الطفيلة</option>
+                  <option>عجلون</option>
+                  <option>العقبة</option>
+                  <option>الكرك</option>
+                  <option>مادبا</option>
+                  <option>المفرق</option>
+                  <option>معان</option>
+                </select>
               </div>
             </div>
-            <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="5"></div>
+            <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="1"></div>
             <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage" placeholder="مثال: 15 د.أ /يوم"></div>
             <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
             <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
@@ -248,14 +269,11 @@ let currentUser = null;
 let currentProfile = null;
 
 // ===== Duration dropdown =====
-const fDuration = document.getElementById('fDuration');
-fDuration.innerHTML = Array.from({length:30}, (_,i)=> i+1).map(d => `<option value="${d}" ${d===7?'selected':''}>${d} ${d===1?'يوم':'أيام'}</option>`).join('');
-
-function bucketFor(days){
-  days = Number(days);
-  if(days <= 3) return '1-3 أيام';
-  if(days <= 7) return '4-7 أيام';
-  if(days <= 14) return '8-14 يوم';
+function bucketFor(days, unit){
+  const d = unit === 'ساعات' ? Number(days) / 24 : Number(days);
+  if(d <= 3) return '1-3 أيام';
+  if(d <= 7) return '4-7 أيام';
+  if(d <= 14) return '8-14 يوم';
   return '15-30 يوم';
 }
 
@@ -369,7 +387,8 @@ document.getElementById('jobForm').addEventListener('submit', async function(e){
     company_name: currentProfile ? currentProfile.full_name : currentUser.email,
     title: document.getElementById('fTitle').value,
     category: document.getElementById('fCategory').value,
-    duration: Number(document.getElementById('fDuration').value),
+    duration: Number(document.getElementById('fDurationNum').value),
+    duration_unit: document.getElementById('fDurationUnit').value,
     city: document.getElementById('fCity').value,
     count: document.getElementById('fCount').value || 1,
     wage: document.getElementById('fWage').value,
@@ -386,7 +405,8 @@ document.getElementById('jobForm').addEventListener('submit', async function(e){
   }
   msg.className='form-msg ok'; msg.textContent = '✓ تم نشر الوظيفة بنجاح.';
   this.reset();
-  document.getElementById('fDuration').value = '7';
+  document.getElementById('fDurationNum').value = '1';
+  document.getElementById('fDurationUnit').value = 'أيام';
   await loadJobs();
 });
 
@@ -411,7 +431,7 @@ function populateFilters(){
 
 function render(){
   const city = filterCity.value, dur = filterDuration.value, cat = filterCategory.value;
-  const filtered = jobs.filter(j => (!city || j.city===city) && (!dur || bucketFor(j.duration)===dur) && (!cat || j.category===cat));
+  const filtered = jobs.filter(j => (!city || j.city===city) && (!dur || bucketFor(j.duration, j.duration_unit)===dur) && (!cat || j.category===cat));
 
   statJobs.textContent = jobs.length;
   statCities.textContent = unique(jobs.map(j=>j.city)).length;
@@ -429,7 +449,7 @@ function render(){
           <h3>${j.title}</h3>
           <div class="co">${j.company_name || ''}</div>
           <div class="badges">
-            <span class="badge dur">${j.duration} ${j.duration==1?'يوم':'أيام'}</span>
+            <span class="badge dur">${j.duration} ${j.duration_unit || 'أيام'}</span>
             <span class="badge cat">${j.category}</span>
             ${j.urgent ? '<span class="badge urgent">عاجل</span>' : ''}
             ${j.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
