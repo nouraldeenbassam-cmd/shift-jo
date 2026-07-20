@@ -178,13 +178,7 @@
         </form>
 
         <form id="signupForm" style="display:none;">
-          <div class="field"><label>نوع الحساب</label>
-            <select id="signupType">
-              <option value="company">شركة (بدي أنشر وظائف)</option>
-              <option value="worker">عامل (بدي أدوّر شغل)</option>
-            </select>
-          </div>
-          <div class="field"><label>الاسم / اسم الشركة</label><input type="text" id="signupName" required></div>
+          <div class="field"><label>الاسم</label><input type="text" id="signupName" required></div>
           <div class="field"><label>الإيميل</label><input type="email" id="signupEmail" required></div>
           <div class="field"><label>كلمة السر</label><input type="password" id="signupPassword" required minlength="6"></div>
           <button type="submit" class="btn">إنشاء حساب</button>
@@ -199,9 +193,9 @@
           <button id="logoutBtn">خروج</button>
         </div>
 
-        <div id="companyPostArea" style="display:none;">
+        <div>
           <h2>انشر طلب عمال</h2>
-          <div class="hint">طلبك بيظهر مباشرة بالموقع لكل الزوار.</div>
+          <div class="hint">أي حساب مسجل يقدر ينشر وظيفة أو يتصفح ويتواصل — طلبك بيظهر مباشرة بالموقع لكل الزوار.</div>
           <form id="jobForm">
             <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
             <div class="field"><label>المجال</label>
@@ -254,14 +248,10 @@
             <div class="form-msg" id="formMsg"></div>
           </form>
         </div>
-
-        <div id="workerArea" style="display:none;">
-          <h2>أهلاً فيك 👋</h2>
-          <div class="hint">تصفح الشواغر المتاحة تحت، واتصل مباشرة بأي وظيفة تناسبك.</div>
-        </div>
       </div>
 
     </div>
+
 
     <div class="board-wrap">
       <div class="board-head">
@@ -371,13 +361,12 @@ document.getElementById('signupForm').addEventListener('submit', async function(
 
   const email = document.getElementById('signupEmail').value;
   const password = document.getElementById('signupPassword').value;
-  const accountType = document.getElementById('signupType').value;
   const fullName = document.getElementById('signupName').value;
 
   const { data, error } = await sb.auth.signUp({
     email, password,
     options: {
-      data: { account_type: accountType, full_name: fullName },
+      data: { full_name: fullName },
       emailRedirectTo: window.location.href
     }
   });
@@ -453,7 +442,7 @@ async function loadSession(){
   if(!profile){
     const meta = currentUser.user_metadata || {};
     const { data: created } = await sb.from('profiles')
-      .upsert({ id: currentUser.id, account_type: meta.account_type || 'worker', full_name: meta.full_name || currentUser.email })
+      .upsert({ id: currentUser.id, full_name: meta.full_name || currentUser.email })
       .select().single();
     profile = created;
   }
@@ -463,10 +452,7 @@ async function loadSession(){
   document.getElementById('authForms').style.display = 'none';
   document.getElementById('loggedInPanel').style.display = 'block';
 
-  const isCompany = profile && profile.account_type === 'company';
-  document.getElementById('companyPostArea').style.display = isCompany ? 'block' : 'none';
-  document.getElementById('workerArea').style.display = isCompany ? 'none' : 'block';
-  document.getElementById('whoName').textContent = (profile ? profile.full_name : currentUser.email) + (isCompany ? ' (شركة)' : ' (باحث عن عمل)');
+  document.getElementById('whoName').textContent = profile ? profile.full_name : currentUser.email;
 }
 
 // ===== Post job =====
