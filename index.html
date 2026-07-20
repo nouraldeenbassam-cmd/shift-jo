@@ -291,11 +291,6 @@ document.getElementById('signupForm').addEventListener('submit', async function(
     return;
   }
 
-  // create profile row
-  if(data.user){
-    await sb.from('profiles').insert({ id: data.user.id, account_type: accountType, full_name: fullName });
-  }
-
   msg.className='form-msg ok';
   msg.textContent = '✓ تم إنشاء الحساب! تحقق من إيميلك واضغط رابط التفعيل قبل ما تسجل دخول.';
   this.reset();
@@ -341,7 +336,17 @@ async function loadSession(){
     return;
   }
 
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  let { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+
+  // profile row doesn't exist yet (e.g. signup insert was blocked before email confirmation) — create it now from the metadata saved at signup
+  if(!profile){
+    const meta = currentUser.user_metadata || {};
+    const { data: created } = await sb.from('profiles')
+      .upsert({ id: currentUser.id, account_type: meta.account_type || 'worker', full_name: meta.full_name || currentUser.email })
+      .select().single();
+    profile = created;
+  }
+
   currentProfile = profile;
 
   document.getElementById('authForms').style.display = 'none';
@@ -350,7 +355,7 @@ async function loadSession(){
   const isCompany = profile && profile.account_type === 'company';
   document.getElementById('companyPostArea').style.display = isCompany ? 'block' : 'none';
   document.getElementById('workerArea').style.display = isCompany ? 'none' : 'block';
-  document.getElementById('whoName').textContent = (profile ? profile.full_name : currentUser.email) + (isCompany ? ' (شركة)' : ' (عامل)');
+  document.getElementById('whoName').textContent = (profile ? profile.full_name : currentUser.email) + (isCompany ? ' (شركة)' : ' (باحث عن عمل)');
 }
 
 // ===== Post job =====
