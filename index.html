@@ -280,7 +280,10 @@ document.getElementById('signupForm').addEventListener('submit', async function(
 
   const { data, error } = await sb.auth.signUp({
     email, password,
-    options: { data: { account_type: accountType, full_name: fullName } }
+    options: {
+      data: { account_type: accountType, full_name: fullName },
+      emailRedirectTo: window.location.href
+    }
   });
 
   if(error){
