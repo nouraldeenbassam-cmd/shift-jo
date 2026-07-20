@@ -154,6 +154,27 @@
           <div class="field"><label>كلمة السر</label><input type="password" id="loginPassword" required></div>
           <button type="submit" class="btn">تسجيل دخول</button>
           <div class="form-msg" id="loginMsg"></div>
+          <div style="text-align:center; margin-top:12px;">
+            <a href="#" id="forgotLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">نسيت كلمة السر؟</a>
+          </div>
+        </form>
+
+        <form id="resetForm" style="display:none;">
+          <div class="hint" style="margin-bottom:14px;">اكتب إيميلك وبنبعتلك رابط لتعيين كلمة سر جديدة.</div>
+          <div class="field"><label>الإيميل</label><input type="email" id="resetEmail" required></div>
+          <button type="submit" class="btn">إرسال رابط إعادة التعيين</button>
+          <div class="form-msg" id="resetMsg"></div>
+          <div style="text-align:center; margin-top:12px;">
+            <a href="#" id="backToLoginLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">رجوع لتسجيل الدخول</a>
+          </div>
+        </form>
+
+        <form id="newPasswordForm" style="display:none;">
+          <h2>تعيين كلمة سر جديدة</h2>
+          <div class="hint">اكتب كلمة السر الجديدة لحسابك.</div>
+          <div class="field"><label>كلمة السر الجديدة</label><input type="password" id="newPassword" required minlength="6"></div>
+          <button type="submit" class="btn">حفظ كلمة السر</button>
+          <div class="form-msg" id="newPasswordMsg"></div>
         </form>
 
         <form id="signupForm" style="display:none;">
@@ -282,8 +303,64 @@ const tabLogin = document.getElementById('tabLogin');
 const tabSignup = document.getElementById('tabSignup');
 const loginForm = document.getElementById('loginForm');
 const signupForm = document.getElementById('signupForm');
-tabLogin.onclick = () => { tabLogin.classList.add('active'); tabSignup.classList.remove('active'); loginForm.style.display='block'; signupForm.style.display='none'; };
-tabSignup.onclick = () => { tabSignup.classList.add('active'); tabLogin.classList.remove('active'); signupForm.style.display='block'; loginForm.style.display='none'; };
+tabLogin.onclick = () => { tabLogin.classList.add('active'); tabSignup.classList.remove('active'); loginForm.style.display='block'; signupForm.style.display='none'; document.getElementById('resetForm').style.display='none'; };
+tabSignup.onclick = () => { tabSignup.classList.add('active'); tabLogin.classList.remove('active'); signupForm.style.display='block'; loginForm.style.display='none'; document.getElementById('resetForm').style.display='none'; };
+
+// ===== Forgot password flow =====
+document.getElementById('forgotLink').onclick = (e) => {
+  e.preventDefault();
+  loginForm.style.display='none';
+  document.getElementById('resetForm').style.display='block';
+};
+document.getElementById('backToLoginLink').onclick = (e) => {
+  e.preventDefault();
+  document.getElementById('resetForm').style.display='none';
+  loginForm.style.display='block';
+};
+document.getElementById('resetForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('resetMsg');
+  msg.style.display='block'; msg.className='form-msg'; msg.textContent='جاري الإرسال...';
+  const email = document.getElementById('resetEmail').value;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
+  if(error){
+    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
+    return;
+  }
+  msg.className='form-msg ok';
+  msg.textContent = '✓ إذا الإيميل مسجل عندنا، رح يوصلك رابط لتعيين كلمة سر جديدة.';
+  this.reset();
+});
+
+// Supabase fires this event automatically when the page opens from a recovery email link
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY'){
+    document.getElementById('authForms').style.display = 'block';
+    document.getElementById('loggedInPanel').style.display = 'none';
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
+    document.getElementById('resetForm').style.display = 'none';
+    document.getElementById('newPasswordForm').style.display = 'block';
+  }
+});
+
+document.getElementById('newPasswordForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('newPasswordMsg');
+  msg.style.display='block'; msg.className='form-msg'; msg.textContent='جاري الحفظ...';
+  const newPassword = document.getElementById('newPassword').value;
+  const { error } = await sb.auth.updateUser({ password: newPassword });
+  if(error){
+    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
+    return;
+  }
+  msg.className='form-msg ok';
+  msg.textContent = '✓ تم تغيير كلمة السر. رح تسجل دخول تلقائياً.';
+  setTimeout(async () => {
+    document.getElementById('newPasswordForm').style.display = 'none';
+    await loadSession();
+  }, 1500);
+});
 
 // ===== Signup =====
 document.getElementById('signupForm').addEventListener('submit', async function(e){
