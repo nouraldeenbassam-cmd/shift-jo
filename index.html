@@ -243,7 +243,7 @@
               </div>
             </div>
             <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="1"></div>
-            <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage" placeholder="مثال: 15 د.أ /يوم"></div>
+            <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage"></div>
             <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
             <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
             <div class="checks">
@@ -357,6 +357,7 @@ document.getElementById('newPasswordForm').addEventListener('submit', async func
   msg.className='form-msg ok';
   msg.textContent = '✓ تم تغيير كلمة السر. رح تسجل دخول تلقائياً.';
   setTimeout(async () => {
+    isRecoveryFlow = false;
     document.getElementById('newPasswordForm').style.display = 'none';
     await loadSession();
   }, 1500);
@@ -420,7 +421,22 @@ document.getElementById('logoutBtn').onclick = async () => {
 };
 
 // ===== Session / UI switching =====
+let isRecoveryFlow = window.location.hash.includes('type=recovery');
+
 async function loadSession(){
+  if(isRecoveryFlow){
+    // arriving from a password-reset email link — show the new-password form instead of the normal dashboard
+    document.getElementById('authForms').style.display = 'block';
+    document.getElementById('loggedInPanel').style.display = 'none';
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
+    document.getElementById('resetForm').style.display = 'none';
+    document.getElementById('newPasswordForm').style.display = 'block';
+    const { data: { session } } = await sb.auth.getSession();
+    currentUser = session ? session.user : null;
+    return;
+  }
+
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
 
