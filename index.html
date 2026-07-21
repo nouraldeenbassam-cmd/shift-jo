@@ -8,23 +8,13 @@
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
   :root{
-    --bg:#FAFAF8;
-    --card:#FFFFFF;
-    --border:#E5E3DC;
-    --border-strong:#D3D1C7;
-    --text:#2C2C2A;
-    --text-dim:#726F66;
-    --blue:#378ADD;
-    --blue-dark:#0C447C;
-    --green:#639922;
-    --green-dark:#27500A;
-    --coral:#D85A30;
-    --sans:'Tajawal', sans-serif;
-    --mono:'IBM Plex Mono', monospace;
+    --bg:#FAFAF8; --card:#FFFFFF; --border:#E5E3DC; --border-strong:#D3D1C7;
+    --text:#2C2C2A; --text-dim:#726F66; --blue:#378ADD; --blue-dark:#0C447C;
+    --green:#639922; --green-dark:#27500A; --coral:#D85A30;
+    --sans:'Tajawal', sans-serif; --mono:'IBM Plex Mono', monospace;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ background:var(--bg); color:var(--text); font-family:var(--sans); }
-
   .wrap{ max-width:1040px; margin:0 auto; padding:0 22px 90px; }
 
   header{ padding:36px 0 30px; border-bottom:1px solid var(--border); }
@@ -43,52 +33,13 @@
   .stat b{ display:block; font-size:22px; color:var(--blue-dark); font-weight:900; }
   .stat span{ font-size:11.5px; color:var(--text-dim); }
 
-  .split{ display:grid; grid-template-columns:1fr; gap:22px; margin-top:32px; }
-  .split .panel{ order:2; }
-  .split .board-wrap{ order:1; }
-  @media(min-width:880px){
-    .split{ grid-template-columns: 340px 1fr; align-items:start; }
-    .split .panel{ order:0; }
-    .split .board-wrap{ order:0; }
+  .post-cta{
+    display:inline-flex; align-items:center; gap:8px; margin-top:18px; background:var(--blue); color:#fff;
+    padding:12px 20px; border-radius:10px; font-weight:700; font-size:14.5px; text-decoration:none;
   }
+  .post-cta:hover{ background:var(--blue-dark); }
 
-  .panel{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; position:sticky; top:20px; }
-  .panel h2{ font-size:17px; font-weight:700; margin-bottom:4px; }
-  .panel .hint{ color:var(--text-dim); font-size:12.5px; margin-bottom:18px; }
-
-  .field{ margin-bottom:13px; }
-  .field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:5px; font-weight:500; }
-  .field input, .field select, .field textarea{
-    width:100%; background:var(--bg); border:1px solid var(--border-strong); color:var(--text);
-    padding:9px 11px; border-radius:8px; font-family:var(--sans); font-size:14px;
-  }
-  .field textarea{ resize:vertical; min-height:60px; }
-  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(55,138,221,0.12); }
-  .field .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .checks{ display:flex; gap:16px; margin-bottom:14px; }
-  .checks label{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim); flex-direction:row-reverse; }
-  .checks input{ width:auto; }
-
-  .btn{
-    width:100%; background:var(--blue); color:#fff; border:none; padding:12px;
-    font-weight:700; font-size:14.5px; border-radius:8px; cursor:pointer; margin-top:4px;
-  }
-  .btn:hover{ background:var(--blue-dark); }
-  .btn.secondary{ background:transparent; color:var(--text-dim); border:1px solid var(--border-strong); }
-  .btn.secondary:hover{ background:var(--bg); }
-  .form-msg{ font-size:12px; margin-top:10px; display:none; font-weight:500; line-height:1.6; }
-  .form-msg.ok{ color:var(--green-dark); }
-  .form-msg.err{ color:var(--coral); }
-
-  .tabs{ display:flex; gap:6px; margin-bottom:16px; background:var(--bg); border-radius:8px; padding:4px; }
-  .tab{ flex:1; text-align:center; padding:8px; font-size:13px; font-weight:600; color:var(--text-dim); border-radius:6px; cursor:pointer; }
-  .tab.active{ background:var(--card); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
-
-  .who-badge{ display:flex; align-items:center; justify-content:space-between; background:var(--bg); border-radius:8px; padding:10px 12px; margin-bottom:16px; }
-  .who-badge span{ font-size:13px; font-weight:600; }
-  .who-badge button{ background:none; border:none; color:var(--coral); font-size:12px; cursor:pointer; font-weight:600; }
-
-  .board-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .board-head{ display:flex; justify-content:space-between; align-items:center; margin:32px 0 14px; flex-wrap:wrap; gap:10px; }
   .board-head h2{ font-size:17px; font-weight:700; }
   .board-filters{ display:flex; gap:8px; flex-wrap:wrap; }
   .board-filters select{
@@ -116,7 +67,6 @@
     font-size:12.5px; text-decoration:none; font-weight:600; border:none; cursor:pointer;
   }
   .job .apply:hover{ background:var(--green-dark); }
-  .job .del{ background:none; border:none; color:var(--coral); font-size:11.5px; cursor:pointer; font-weight:600; }
 
   .empty{ text-align:center; padding:50px 20px; color:var(--text-dim); font-size:13px; border:1px dashed var(--border-strong); border-radius:12px; }
 
@@ -128,7 +78,7 @@
   <header>
     <div class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></div>
     <h1 style="margin-top:22px;">شواغر <em>قصيرة المدة</em>، بكل مكان</h1>
-    <p class="lead">من عمالة يومية لمهام تخصصية — انشر طلبك أو دوّر شغلة تناسبك.</p>
+    <p class="lead">من عمالة يومية لمهام تخصصية — دوّر شغلة تناسبك، أو انشر طلبك.</p>
 
     <div class="stat-row">
       <div class="stat"><b id="statJobs">0</b><span>وظيفة متاحة</span></div>
@@ -136,150 +86,28 @@
       <div class="stat"><b id="statCats">0</b><span>مجال</span></div>
     </div>
 
-    <a href="#authPanel" style="display:inline-block; margin-top:16px; font-size:13px; color:var(--blue-dark); font-weight:600; text-decoration:none;">عندك شركة وبدك تنشر طلب؟ سجل من هون ↓</a>
+    <a href="post.html" class="post-cta">+ انشر إعلان عن وظيفة</a>
   </header>
 
-  <div class="split">
-    <div class="panel" id="authPanel">
-
-      <!-- Logged out: login/signup -->
-      <div id="authForms">
-        <div class="tabs">
-          <div class="tab active" id="tabLogin">تسجيل دخول</div>
-          <div class="tab" id="tabSignup">حساب جديد</div>
-        </div>
-
-        <form id="loginForm">
-          <div class="field"><label>الإيميل</label><input type="email" id="loginEmail" required></div>
-          <div class="field"><label>كلمة السر</label><input type="password" id="loginPassword" required></div>
-          <button type="submit" class="btn">تسجيل دخول</button>
-          <div class="form-msg" id="loginMsg"></div>
-          <div style="text-align:center; margin-top:12px;">
-            <a href="#" id="forgotLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">نسيت كلمة السر؟</a>
-          </div>
-        </form>
-
-        <form id="resetForm" style="display:none;">
-          <div class="hint" style="margin-bottom:14px;">اكتب إيميلك وبنبعتلك رابط لتعيين كلمة سر جديدة.</div>
-          <div class="field"><label>الإيميل</label><input type="email" id="resetEmail" required></div>
-          <button type="submit" class="btn">إرسال رابط إعادة التعيين</button>
-          <div class="form-msg" id="resetMsg"></div>
-          <div style="text-align:center; margin-top:12px;">
-            <a href="#" id="backToLoginLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">رجوع لتسجيل الدخول</a>
-          </div>
-        </form>
-
-        <form id="newPasswordForm" style="display:none;">
-          <h2>تعيين كلمة سر جديدة</h2>
-          <div class="hint">اكتب كلمة السر الجديدة لحسابك.</div>
-          <div class="field"><label>كلمة السر الجديدة</label><input type="password" id="newPassword" required minlength="6"></div>
-          <button type="submit" class="btn">حفظ كلمة السر</button>
-          <div class="form-msg" id="newPasswordMsg"></div>
-        </form>
-
-        <form id="signupForm" style="display:none;">
-          <div class="field"><label>الاسم</label><input type="text" id="signupName" required></div>
-          <div class="field"><label>الإيميل</label><input type="email" id="signupEmail" required></div>
-          <div class="field"><label>كلمة السر</label><input type="password" id="signupPassword" required minlength="6"></div>
-          <button type="submit" class="btn">إنشاء حساب</button>
-          <div class="form-msg" id="signupMsg"></div>
-        </form>
-      </div>
-
-      <!-- Logged in -->
-      <div id="loggedInPanel" style="display:none;">
-        <div class="who-badge">
-          <span id="whoName"></span>
-          <button id="logoutBtn">خروج</button>
-        </div>
-
-        <div>
-          <h2>انشر طلب عمال</h2>
-          <div class="hint">أي حساب مسجل يقدر ينشر وظيفة أو يتصفح ويتواصل — طلبك بيظهر مباشرة بالموقع لكل الزوار.</div>
-          <form id="jobForm">
-            <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
-            <div class="field"><label>المجال</label>
-              <select id="fCategory">
-                <option selected>عمالة يدوية</option>
-                <option>تقنية / IT</option>
-                <option>إداري / مكتبي</option>
-                <option>ضيافة / مطاعم</option>
-                <option>تعليم / تدريب</option>
-                <option>تصميم / محتوى</option>
-                <option>أخرى</option>
-              </select>
-            </div>
-            <div class="field row2">
-              <div><label>المدة</label>
-                <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                  <input type="number" id="fDurationNum" min="1" value="1">
-                  <select id="fDurationUnit">
-                    <option value="ساعات">ساعات</option>
-                    <option value="أيام" selected>أيام</option>
-                  </select>
-                </div>
-              </div>
-              <div><label>المدينة</label>
-                <select id="fCity">
-                  <option>عمّان</option>
-                  <option>إربد</option>
-                  <option>البلقاء</option>
-                  <option>جرش</option>
-                  <option>الزرقاء</option>
-                  <option>الطفيلة</option>
-                  <option>عجلون</option>
-                  <option>العقبة</option>
-                  <option>الكرك</option>
-                  <option>مادبا</option>
-                  <option>المفرق</option>
-                  <option>معان</option>
-                </select>
-              </div>
-            </div>
-            <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="1"></div>
-            <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage"></div>
-            <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
-            <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
-            <div class="checks">
-              <label><input type="checkbox" id="fUrgent">مستعجل</label>
-              <label><input type="checkbox" id="fSkilled">يتطلب شهادة/تخصص</label>
-            </div>
-            <button type="submit" class="btn">انشر الطلب</button>
-            <div class="form-msg" id="formMsg"></div>
-          </form>
-        </div>
-      </div>
-
-    </div>
-
-
-    <div class="board-wrap">
-      <div class="board-head">
-        <h2>الشواغر المتاحة</h2>
-        <div class="board-filters">
-          <select id="filterCategory"><option value="">كل المجالات</option></select>
-          <select id="filterCity"><option value="">كل المدن</option></select>
-          <select id="filterDuration"><option value="">كل المدد</option></select>
-        </div>
-      </div>
-      <div class="job-list" id="jobList"></div>
+  <div class="board-head">
+    <h2>الشواغر المتاحة</h2>
+    <div class="board-filters">
+      <select id="filterCategory"><option value="">كل المجالات</option></select>
+      <select id="filterCity"><option value="">كل المدن</option></select>
+      <select id="filterDuration"><option value="">كل المدد</option></select>
     </div>
   </div>
+  <div class="job-list" id="jobList"></div>
 
   <footer>شفت / Shift — منصة الشغل المؤقت</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===== Supabase setup =====
 const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
-let currentProfile = null;
-
-// ===== Duration dropdown =====
 function bucketFor(days, unit){
   const d = unit === 'ساعات' ? Number(days) / 24 : Number(days);
   if(d <= 3) return '1-3 أيام';
@@ -288,208 +116,8 @@ function bucketFor(days, unit){
   return '15-30 يوم';
 }
 
-// ===== Tabs (login / signup) =====
-const tabLogin = document.getElementById('tabLogin');
-const tabSignup = document.getElementById('tabSignup');
-const loginForm = document.getElementById('loginForm');
-const signupForm = document.getElementById('signupForm');
-tabLogin.onclick = () => { tabLogin.classList.add('active'); tabSignup.classList.remove('active'); loginForm.style.display='block'; signupForm.style.display='none'; document.getElementById('resetForm').style.display='none'; };
-tabSignup.onclick = () => { tabSignup.classList.add('active'); tabLogin.classList.remove('active'); signupForm.style.display='block'; loginForm.style.display='none'; document.getElementById('resetForm').style.display='none'; };
+let jobs = [];
 
-// ===== Forgot password flow =====
-document.getElementById('forgotLink').onclick = (e) => {
-  e.preventDefault();
-  loginForm.style.display='none';
-  document.getElementById('resetForm').style.display='block';
-};
-document.getElementById('backToLoginLink').onclick = (e) => {
-  e.preventDefault();
-  document.getElementById('resetForm').style.display='none';
-  loginForm.style.display='block';
-};
-document.getElementById('resetForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('resetMsg');
-  msg.style.display='block'; msg.className='form-msg'; msg.textContent='جاري الإرسال...';
-  const email = document.getElementById('resetEmail').value;
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
-  if(error){
-    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
-    return;
-  }
-  msg.className='form-msg ok';
-  msg.textContent = '✓ إذا الإيميل مسجل عندنا، رح يوصلك رابط لتعيين كلمة سر جديدة.';
-  this.reset();
-});
-
-// Supabase fires this event automatically when the page opens from a recovery email link
-sb.auth.onAuthStateChange((event, session) => {
-  if(event === 'PASSWORD_RECOVERY'){
-    document.getElementById('authForms').style.display = 'block';
-    document.getElementById('loggedInPanel').style.display = 'none';
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'none';
-    document.getElementById('resetForm').style.display = 'none';
-    document.getElementById('newPasswordForm').style.display = 'block';
-  }
-});
-
-document.getElementById('newPasswordForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('newPasswordMsg');
-  msg.style.display='block'; msg.className='form-msg'; msg.textContent='جاري الحفظ...';
-  const newPassword = document.getElementById('newPassword').value;
-  const { error } = await sb.auth.updateUser({ password: newPassword });
-  if(error){
-    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
-    return;
-  }
-  msg.className='form-msg ok';
-  msg.textContent = '✓ تم تغيير كلمة السر. رح تسجل دخول تلقائياً.';
-  setTimeout(async () => {
-    isRecoveryFlow = false;
-    document.getElementById('newPasswordForm').style.display = 'none';
-    await loadSession();
-  }, 1500);
-});
-
-// ===== Signup =====
-document.getElementById('signupForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('signupMsg');
-  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري إنشاء الحساب...';
-
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  const fullName = document.getElementById('signupName').value;
-
-  const { data, error } = await sb.auth.signUp({
-    email, password,
-    options: {
-      data: { full_name: fullName },
-      emailRedirectTo: window.location.href
-    }
-  });
-
-  if(error){
-    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
-    return;
-  }
-
-  msg.className='form-msg ok';
-  msg.textContent = '✓ تم إنشاء الحساب! تحقق من إيميلك واضغط رابط التفعيل قبل ما تسجل دخول.';
-  this.reset();
-});
-
-// ===== Login =====
-document.getElementById('loginForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('loginMsg');
-  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري تسجيل الدخول...';
-
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-  if(error){
-    msg.className='form-msg err';
-    msg.textContent = error.message.includes('Email not confirmed')
-      ? 'لازم تفعّل إيميلك أولاً — تحقق من صندوق الوارد.'
-      : 'خطأ: تأكد من الإيميل وكلمة السر.';
-    return;
-  }
-  msg.style.display='none';
-  await loadSession();
-});
-
-// ===== Logout =====
-document.getElementById('logoutBtn').onclick = async () => {
-  await sb.auth.signOut();
-  await loadSession();
-};
-
-// ===== Session / UI switching =====
-let isRecoveryFlow = window.location.hash.includes('type=recovery');
-
-async function loadSession(){
-  if(isRecoveryFlow){
-    // arriving from a password-reset email link — show the new-password form instead of the normal dashboard
-    document.getElementById('authForms').style.display = 'block';
-    document.getElementById('loggedInPanel').style.display = 'none';
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'none';
-    document.getElementById('resetForm').style.display = 'none';
-    document.getElementById('newPasswordForm').style.display = 'block';
-    const { data: { session } } = await sb.auth.getSession();
-    currentUser = session ? session.user : null;
-    return;
-  }
-
-  const { data: { session } } = await sb.auth.getSession();
-  currentUser = session ? session.user : null;
-
-  if(!currentUser){
-    document.getElementById('authForms').style.display = 'block';
-    document.getElementById('loggedInPanel').style.display = 'none';
-    currentProfile = null;
-    return;
-  }
-
-  let { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-
-  // profile row doesn't exist yet (e.g. signup insert was blocked before email confirmation) — create it now from the metadata saved at signup
-  if(!profile){
-    const meta = currentUser.user_metadata || {};
-    const { data: created } = await sb.from('profiles')
-      .upsert({ id: currentUser.id, full_name: meta.full_name || currentUser.email })
-      .select().single();
-    profile = created;
-  }
-
-  currentProfile = profile;
-
-  document.getElementById('authForms').style.display = 'none';
-  document.getElementById('loggedInPanel').style.display = 'block';
-
-  document.getElementById('whoName').textContent = profile ? profile.full_name : currentUser.email;
-}
-
-// ===== Post job =====
-document.getElementById('jobForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('formMsg');
-  msg.style.display='block'; msg.className='form-msg'; msg.textContent = 'جاري النشر...';
-
-  const newJob = {
-    company_id: currentUser.id,
-    company_name: currentProfile ? currentProfile.full_name : currentUser.email,
-    title: document.getElementById('fTitle').value,
-    category: document.getElementById('fCategory').value,
-    duration: Number(document.getElementById('fDurationNum').value),
-    duration_unit: document.getElementById('fDurationUnit').value,
-    city: document.getElementById('fCity').value,
-    count: document.getElementById('fCount').value || 1,
-    wage: document.getElementById('fWage').value,
-    phone: document.getElementById('fPhone').value,
-    job_desc: document.getElementById('fDesc').value,
-    urgent: document.getElementById('fUrgent').checked,
-    skilled: document.getElementById('fSkilled').checked
-  };
-
-  const { error } = await sb.from('jobs').insert(newJob);
-  if(error){
-    msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message;
-    return;
-  }
-  msg.className='form-msg ok'; msg.textContent = '✓ تم نشر الوظيفة بنجاح.';
-  this.reset();
-  document.getElementById('fDurationNum').value = '1';
-  document.getElementById('fDurationUnit').value = 'أيام';
-  await loadJobs();
-});
-
-// ===== Load + render jobs =====
 const jobList = document.getElementById('jobList');
 const filterCity = document.getElementById('filterCity');
 const filterDuration = document.getElementById('filterDuration');
@@ -497,8 +125,6 @@ const filterCategory = document.getElementById('filterCategory');
 const statJobs = document.getElementById('statJobs');
 const statCities = document.getElementById('statCities');
 const statCats = document.getElementById('statCats');
-
-let jobs = [];
 
 function unique(arr){ return [...new Set(arr)]; }
 
@@ -540,16 +166,8 @@ function render(){
         <span class="wage">${j.wage || '—'} · ${j.city}</span>
         <a href="tel:${j.phone}" class="apply">اتصل الآن</a>
       </div>
-      ${currentUser && j.company_id === currentUser.id ? `<div style="margin-top:8px; text-align:left;"><button class="del" data-id="${j.id}">حذف الوظيفة</button></div>` : ''}
     </div>
   `).join('');
-
-  document.querySelectorAll('.del').forEach(btn => {
-    btn.onclick = async () => {
-      await sb.from('jobs').delete().eq('id', btn.dataset.id);
-      await loadJobs();
-    };
-  });
 }
 
 async function loadJobs(){
@@ -563,11 +181,7 @@ async function loadJobs(){
 
 [filterCity, filterDuration, filterCategory].forEach(el => el.addEventListener('change', render));
 
-// ===== Init =====
-(async function init(){
-  await loadSession();
-  await loadJobs();
-})();
+loadJobs();
 </script>
 </body>
 </html>
