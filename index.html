@@ -18,10 +18,23 @@
   .wrap{ max-width:1040px; margin:0 auto; padding:0 22px 90px; }
 
   header{ padding:36px 0 30px; border-bottom:1px solid var(--border); }
-  .brand{ display:flex; align-items:center; gap:8px; }
+  .brand{ display:flex; align-items:center; gap:8px; text-decoration:none; }
   .brand .mark{ width:28px; height:28px; border-radius:8px; background:var(--blue); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:14px; }
   .brand .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
   .brand .name span{ color:var(--blue); }
+
+  .topbar{ position:sticky; top:0; z-index:50; background:var(--card); border-bottom:1px solid var(--border); }
+  .topbar-inner{ max-width:1040px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; justify-content:space-between; }
+  .topbar-icons{ display:flex; align-items:center; gap:8px; }
+  .icon-btn{ position:relative; background:none; border:1px solid var(--border-strong); border-radius:8px; width:34px; height:34px; cursor:pointer; font-size:15px; color:var(--text); display:flex; align-items:center; justify-content:center; }
+  .bell-count{ display:none; position:absolute; top:-6px; left:-6px; background:var(--coral); color:#fff; font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; }
+  .gear-wrap{ position:relative; }
+  .gear-menu{ display:none; position:absolute; top:42px; left:0; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.08); min-width:170px; overflow:hidden; z-index:60; }
+  .gear-menu.open{ display:block; }
+  .gear-menu a, .gear-menu button{ display:block; width:100%; text-align:right; padding:10px 14px; font-size:13px; color:var(--text); text-decoration:none; background:none; border:none; cursor:pointer; font-family:var(--sans); }
+  .gear-menu a:hover, .gear-menu button:hover{ background:var(--bg); }
+  .gear-menu button{ color:var(--coral); border-top:1px solid var(--border); }
+  .login-link{ font-size:12.5px; color:var(--blue-dark); text-decoration:none; font-weight:600; }
 
   h1{ font-size:clamp(30px,5vw,46px); font-weight:900; line-height:1.2; margin-top:22px; letter-spacing:-0.01em; }
   h1 em{ font-style:normal; color:var(--green); }
@@ -78,9 +91,14 @@
 </style>
 </head>
 <body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
+    <div class="topbar-icons" id="topbarIcons"></div>
+  </div>
+</div>
 <div class="wrap">
   <header>
-    <div class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></div>
     <h1 style="margin-top:22px;">شواغر <em>قصيرة المدة</em>، بكل مكان</h1>
     <p class="lead">من عمالة يومية لمهام تخصصية — دوّر شغلة تناسبك، أو انشر طلبك.</p>
 
@@ -118,6 +136,42 @@ function bucketFor(days, unit){
   if(d <= 7) return '4-7 أيام';
   if(d <= 14) return '8-14 يوم';
   return '15-30 يوم';
+}
+
+function daysSince(dateStr){
+  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
+}
+
+async function renderTopbar(user){
+  const box = document.getElementById('topbarIcons');
+  if(!user){
+    box.innerHTML = `<a href="post.html" class="login-link">تسجيل دخول</a>`;
+    return;
+  }
+  const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
+  const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
+
+  box.innerHTML = `
+    <button id="bellBtn" class="icon-btn" title="الإشعارات">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <div class="gear-wrap">
+      <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
+      <div id="gearMenu" class="gear-menu">
+        <a href="post.html">الصفحة الشخصية</a>
+        <a href="post.html">الإعدادات</a>
+        <button id="logoutBtn">تسجيل خروج</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('bellCount').style.display = needsRenewal > 0 ? 'flex' : 'none';
+  document.getElementById('bellBtn').onclick = () => { window.location.href = 'post.html'; };
+  const gearBtn = document.getElementById('gearBtn');
+  const gearMenu = document.getElementById('gearMenu');
+  gearBtn.onclick = (e) => { e.stopPropagation(); gearMenu.classList.toggle('open'); };
+  document.addEventListener('click', () => gearMenu.classList.remove('open'));
+  document.getElementById('logoutBtn').onclick = async () => {
+    await sb.auth.signOut();
+    window.location.reload();
+  };
 }
 
 let jobs = [];
@@ -198,6 +252,7 @@ function render(){
 async function loadJobs(){
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  await renderTopbar(currentUser);
 
   const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
   if(!error && data){

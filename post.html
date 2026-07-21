@@ -55,9 +55,19 @@
   .tab{ flex:1; text-align:center; padding:8px; font-size:13px; font-weight:600; color:var(--text-dim); border-radius:6px; cursor:pointer; }
   .tab.active{ background:var(--card); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
 
-  .who-badge{ display:flex; align-items:center; justify-content:space-between; background:var(--bg); border-radius:8px; padding:10px 12px; margin-bottom:16px; }
-  .who-badge span{ font-size:13px; font-weight:600; }
-  .who-badge button{ background:none; border:none; color:var(--coral); font-size:12px; cursor:pointer; font-weight:600; }
+  .topbar{ position:sticky; top:0; z-index:50; background:var(--card); border-bottom:1px solid var(--border); }
+  .topbar-inner{ max-width:560px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; justify-content:space-between; }
+  .topbar .brand{ display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .topbar-icons{ display:flex; align-items:center; gap:8px; }
+  .icon-btn{ position:relative; background:none; border:1px solid var(--border-strong); border-radius:8px; width:34px; height:34px; cursor:pointer; font-size:15px; color:var(--text); display:flex; align-items:center; justify-content:center; }
+  .bell-count{ display:none; position:absolute; top:-6px; left:-6px; background:var(--coral); color:#fff; font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; }
+  .gear-wrap{ position:relative; }
+  .gear-menu{ display:none; position:absolute; top:42px; left:0; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.08); min-width:170px; overflow:hidden; z-index:60; }
+  .gear-menu.open{ display:block; }
+  .gear-menu a, .gear-menu button{ display:block; width:100%; text-align:right; padding:10px 14px; font-size:13px; color:var(--text); text-decoration:none; background:none; border:none; cursor:pointer; font-family:var(--sans); }
+  .gear-menu a:hover, .gear-menu button:hover{ background:var(--bg); }
+  .gear-menu button{ color:var(--coral); border-top:1px solid var(--border); }
+  .login-link{ font-size:12.5px; color:var(--blue-dark); text-decoration:none; font-weight:600; }
 
   .my-jobs{ margin-top:22px; }
   .my-jobs h2{ font-size:15px; font-weight:700; margin-bottom:10px; }
@@ -68,9 +78,14 @@
 </style>
 </head>
 <body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
+    <div class="topbar-icons" id="topbarIcons"></div>
+  </div>
+</div>
 <div class="wrap">
   <header>
-    <div class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></div>
     <a href="index.html" class="back-link">← رجوع لكل الشواغر</a>
   </header>
 
@@ -124,12 +139,6 @@
     <div id="loggedInPanel" style="display:none;">
       <div class="who-badge">
         <span id="whoName"></span>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button id="bellBtn" style="position:relative; background:none; border:1px solid var(--border-strong); border-radius:8px; width:32px; height:32px; cursor:pointer; font-size:15px; color:var(--text);">
-            🔔<span id="bellCount" style="display:none; position:absolute; top:-6px; left:-6px; background:var(--coral); color:#fff; font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center;"></span>
-          </button>
-          <button id="logoutBtn">خروج</button>
-        </div>
       </div>
 
       <h2>انشر طلب عمال</h2>
@@ -186,7 +195,7 @@
         <div class="form-msg" id="formMsg"></div>
       </form>
 
-      <div class="my-jobs">
+      <div class="my-jobs" id="myJobsSection">
         <h2>إعلاناتك المنشورة</h2>
         <div id="myJobsList"></div>
       </div>
@@ -304,14 +313,41 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   await loadSession();
 });
 
-document.getElementById('logoutBtn').onclick = async () => {
-  await sb.auth.signOut();
-  await loadSession();
-};
+async function renderTopbar(user){
+  const box = document.getElementById('topbarIcons');
+  if(!user){
+    box.innerHTML = `<a href="post.html" class="login-link">تسجيل دخول</a>`;
+    return;
+  }
+  const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
+  const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
 
-document.getElementById('bellBtn').onclick = () => {
-  document.querySelector('.my-jobs').scrollIntoView({ behavior: 'smooth' });
-};
+  box.innerHTML = `
+    <button id="bellBtn" class="icon-btn" title="الإشعارات">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <div class="gear-wrap">
+      <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
+      <div id="gearMenu" class="gear-menu">
+        <a href="post.html">الصفحة الشخصية</a>
+        <a href="post.html">الإعدادات</a>
+        <button id="logoutBtn">تسجيل خروج</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('bellCount').style.display = needsRenewal > 0 ? 'flex' : 'none';
+
+  document.getElementById('bellBtn').onclick = () => {
+    const section = document.getElementById('myJobsSection');
+    if(section) section.scrollIntoView({ behavior: 'smooth' });
+  };
+  const gearBtn = document.getElementById('gearBtn');
+  const gearMenu = document.getElementById('gearMenu');
+  gearBtn.onclick = (e) => { e.stopPropagation(); gearMenu.classList.toggle('open'); };
+  document.addEventListener('click', () => gearMenu.classList.remove('open'));
+  document.getElementById('logoutBtn').onclick = async () => {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  };
+}
 
 async function loadSession(){
   if(isRecoveryFlow){
@@ -323,11 +359,13 @@ async function loadSession(){
     document.getElementById('newPasswordForm').style.display = 'block';
     const { data: { session } } = await sb.auth.getSession();
     currentUser = session ? session.user : null;
+    await renderTopbar(currentUser);
     return;
   }
 
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  await renderTopbar(currentUser);
 
   if(!currentUser){
     document.getElementById('authForms').style.display = 'block';
