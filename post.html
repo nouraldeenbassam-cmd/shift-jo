@@ -124,7 +124,12 @@
     <div id="loggedInPanel" style="display:none;">
       <div class="who-badge">
         <span id="whoName"></span>
-        <button id="logoutBtn">خروج</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="bellBtn" style="position:relative; background:none; border:1px solid var(--border-strong); border-radius:8px; width:32px; height:32px; cursor:pointer; font-size:15px; color:var(--text);">
+            🔔<span id="bellCount" style="display:none; position:absolute; top:-6px; left:-6px; background:var(--coral); color:#fff; font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center;"></span>
+          </button>
+          <button id="logoutBtn">خروج</button>
+        </div>
       </div>
 
       <h2>انشر طلب عمال</h2>
@@ -184,6 +189,11 @@
       <div class="my-jobs">
         <h2>إعلاناتك المنشورة</h2>
         <div id="myJobsList"></div>
+      </div>
+
+      <div class="my-jobs">
+        <h2>الوظائف المحفوظة</h2>
+        <div id="savedJobsList"></div>
       </div>
     </div>
 
@@ -299,6 +309,10 @@ document.getElementById('logoutBtn').onclick = async () => {
   await loadSession();
 };
 
+document.getElementById('bellBtn').onclick = () => {
+  document.querySelector('.my-jobs').scrollIntoView({ behavior: 'smooth' });
+};
+
 async function loadSession(){
   if(isRecoveryFlow){
     document.getElementById('authForms').style.display = 'block';
@@ -337,6 +351,7 @@ async function loadSession(){
   document.getElementById('whoName').textContent = profile ? profile.full_name : currentUser.email;
 
   await loadMyJobs();
+  await loadSavedJobs();
 }
 
 document.getElementById('jobForm').addEventListener('submit', async function(e){
@@ -370,26 +385,91 @@ document.getElementById('jobForm').addEventListener('submit', async function(e){
   await loadMyJobs();
 });
 
+function daysSince(dateStr){
+  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
+}
+
 async function loadMyJobs(){
   const { data, error } = await sb.from('jobs').select('*').eq('company_id', currentUser.id).order('created_at', { ascending: false });
   const list = document.getElementById('myJobsList');
   if(error || !data || data.length === 0){
     list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">لسا ما نشرت أي إعلان.</div>`;
+    document.getElementById('bellCount').style.display = 'none';
     return;
   }
-  list.innerHTML = data.map(j => `
+
+  const needsRenewal = data.filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
+  const bellCount = document.getElementById('bellCount');
+  if(needsRenewal.length > 0){
+    bellCount.textContent = needsRenewal.length;
+    bellCount.style.display = 'flex';
+  } else {
+    bellCount.style.display = 'none';
+  }
+
+  list.innerHTML = data.map(j => {
+    const age = daysSince(j.renewed_at || j.created_at);
+    if(age >= 7){
+      return `
+        <div class="my-job" data-jobid="${j.id}" style="flex-direction:column; align-items:stretch; border-color:var(--coral); background:#FFF8F5;">
+          <div style="margin-bottom:8px;">
+            <div class="t">${j.title}</div>
+            <div class="c">${j.city} · مرق عليها ${Math.floor(age)} أيام — لسا متاحة الوظيفة؟</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button data-renew="${j.id}" style="flex:1; background:var(--green); color:#fff; border:none; padding:7px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">لسا متاحة — جدد 7 أيام</button>
+            <button data-id="${j.id}" style="flex:1; background:none; border:1px solid var(--coral); color:var(--coral);">خلص — احذف</button>
+          </div>
+        </div>`;
+    }
+    return `
     <div class="my-job">
       <div>
         <div class="t">${j.title}</div>
-        <div class="c">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'}</div>
+        <div class="c">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'} · ${j.clicks || 0} شخص ضغط على الرقم</div>
       </div>
       <button data-id="${j.id}">حذف</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
+
+  list.querySelectorAll('button[data-renew]').forEach(btn => {
+    btn.onclick = async () => {
+      await sb.from('jobs').update({ renewed_at: new Date().toISOString() }).eq('id', btn.dataset.renew);
+      await loadMyJobs();
+    };
+  });
   list.querySelectorAll('button[data-id]').forEach(btn => {
     btn.onclick = async () => {
       await sb.from('jobs').delete().eq('id', btn.dataset.id);
       await loadMyJobs();
+    };
+  });
+}
+
+async function loadSavedJobs(){
+  const list = document.getElementById('savedJobsList');
+  const { data, error } = await sb.from('saved_jobs').select('job_id, jobs(*)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if(error || !data || data.length === 0){
+    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">ما فيه وظائف محفوظة لسا.</div>`;
+    return;
+  }
+  list.innerHTML = data.filter(r => r.jobs).map(r => `
+    <div class="my-job">
+      <div>
+        <div class="t">${r.jobs.title}</div>
+        <div class="c">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <a href="job.html?id=${r.job_id}" style="font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center;">التفاصيل</a>
+        <button data-unsave="${r.job_id}">إزالة</button>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('button[data-unsave]').forEach(btn => {
+    btn.onclick = async () => {
+      await sb.from('saved_jobs').delete().eq('user_id', currentUser.id).eq('job_id', btn.dataset.unsave);
+      await loadSavedJobs();
     };
   });
 }

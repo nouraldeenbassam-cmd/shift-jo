@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الوظيفة — شفت / Shift</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  :root{
+    --bg:#FAFAF8; --card:#FFFFFF; --border:#E5E3DC; --border-strong:#D3D1C7;
+    --text:#2C2C2A; --text-dim:#726F66; --blue:#378ADD; --blue-dark:#0C447C;
+    --green:#639922; --green-dark:#27500A; --coral:#D85A30;
+    --sans:'Tajawal', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:var(--sans); }
+  .wrap{ max-width:640px; margin:0 auto; padding:0 22px 90px; }
+
+  header{ padding:30px 0 22px; }
+  .brand{ display:flex; align-items:center; gap:8px; }
+  .brand .mark{ width:28px; height:28px; border-radius:8px; background:var(--blue); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:14px; }
+  .brand .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
+  .brand .name span{ color:var(--blue); }
+  .back-link{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--text-dim); text-decoration:none; }
+  .back-link:hover{ text-decoration:underline; }
+
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; }
+  .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  h1{ font-size:22px; font-weight:800; line-height:1.35; }
+  .co{ font-size:13.5px; color:var(--text-dim); margin-top:6px; }
+  .save-btn{ background:none; border:1px solid var(--border-strong); border-radius:10px; width:40px; height:40px; font-size:18px; cursor:pointer; flex-shrink:0; }
+  .save-btn.saved{ background:rgba(216,90,48,0.1); border-color:var(--coral); }
+
+  .badges{ display:flex; gap:6px; margin-top:14px; flex-wrap:wrap; }
+  .badge{ font-size:11.5px; padding:4px 12px; border-radius:20px; font-weight:500; }
+  .badge.dur{ background:rgba(55,138,221,0.1); color:var(--blue-dark); }
+  .badge.cat{ background:rgba(99,153,34,0.1); color:var(--green-dark); }
+  .badge.urgent{ background:rgba(216,90,48,0.1); color:var(--coral); }
+  .badge.skilled{ background:#F1EFE8; color:var(--text-dim); }
+
+  .wage{ font-size:19px; font-weight:800; margin-top:18px; }
+  .city{ font-size:13.5px; color:var(--text-dim); margin-top:4px; }
+
+  .desc{ margin-top:20px; padding-top:20px; border-top:1px solid var(--border); font-size:14.5px; line-height:1.8; color:var(--text); }
+  .desc-empty{ color:var(--text-dim); font-style:normal; }
+
+  .contact-box{ margin-top:22px; padding-top:22px; border-top:1px solid var(--border); }
+  .contact-locked{ text-align:center; padding:20px; background:var(--bg); border-radius:10px; }
+  .contact-locked p{ font-size:13.5px; color:var(--text-dim); margin-bottom:14px; }
+  .btn{ display:inline-block; background:var(--blue); color:#fff; border:none; padding:12px 24px; font-weight:700; font-size:14.5px; border-radius:8px; cursor:pointer; text-decoration:none; }
+  .btn:hover{ background:var(--blue-dark); }
+  .btn.call{ background:var(--green); width:100%; text-align:center; }
+  .btn.call:hover{ background:var(--green-dark); }
+
+  .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></div>
+    <a href="index.html" class="back-link">← رجوع لكل الشواغر</a>
+  </header>
+
+  <div id="loading" class="loading">جاري التحميل...</div>
+  <div class="card" id="jobCard" style="display:none;"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get('id');
+
+let currentUser = null;
+let job = null;
+let isSaved = false;
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session ? session.user : null;
+
+  if(!jobId){
+    document.getElementById('loading').textContent = 'ما فيه رابط وظيفة صحيح.';
+    return;
+  }
+
+  const { data, error } = await sb.from('jobs').select('*').eq('id', jobId).single();
+  if(error || !data){
+    document.getElementById('loading').textContent = 'هاي الوظيفة مش موجودة (يمكن انحذفت أو خلصت مدتها).';
+    return;
+  }
+  job = data;
+
+  if(currentUser){
+    const { data: saved } = await sb.from('saved_jobs').select('*').eq('user_id', currentUser.id).eq('job_id', job.id).maybeSingle();
+    isSaved = !!saved;
+  }
+
+  render();
+}
+
+function render(){
+  document.getElementById('loading').style.display = 'none';
+  const card = document.getElementById('jobCard');
+  card.style.display = 'block';
+
+  const contactHtml = currentUser ? `
+    <div class="contact-box">
+      <a href="tel:${job.phone}" class="btn call" id="callBtn">اتصل الآن — ${job.phone}</a>
+    </div>
+  ` : `
+    <div class="contact-box">
+      <div class="contact-locked">
+        <p>لازم تسجل دخول حتى تقدر تشوف رقم التواصل وتتصلي بالشركة.</p>
+        <a href="post.html" class="btn">تسجيل دخول / حساب جديد</a>
+      </div>
+    </div>
+  `;
+
+  card.innerHTML = `
+    <div class="top-row">
+      <div>
+        <h1>${job.title}</h1>
+        <div class="co">${job.company_name || ''}</div>
+      </div>
+      <button class="save-btn ${isSaved ? 'saved' : ''}" id="saveBtn">${isSaved ? '❤️' : '🤍'}</button>
+    </div>
+    <div class="badges">
+      <span class="badge dur">${job.duration} ${job.duration_unit || 'أيام'}</span>
+      <span class="badge cat">${job.category}</span>
+      ${job.urgent ? '<span class="badge urgent">عاجل</span>' : ''}
+      ${job.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
+    </div>
+    <div class="wage">${job.wage || '—'}</div>
+    <div class="city">${job.city} · ${job.count || 1} عامل مطلوب</div>
+    <div class="desc">${job.job_desc ? job.job_desc : '<span class="desc-empty">ما فيه تفاصيل إضافية.</span>'}</div>
+    ${contactHtml}
+  `;
+
+  document.getElementById('saveBtn').onclick = toggleSave;
+  const callBtn = document.getElementById('callBtn');
+  if(callBtn){
+    callBtn.addEventListener('click', async () => {
+      await sb.from('jobs').update({ clicks: (job.clicks || 0) + 1 }).eq('id', job.id);
+    });
+  }
+}
+
+async function toggleSave(){
+  if(!currentUser){
+    window.location.href = 'post.html';
+    return;
+  }
+  if(isSaved){
+    await sb.from('saved_jobs').delete().eq('user_id', currentUser.id).eq('job_id', job.id);
+  } else {
+    await sb.from('saved_jobs').insert({ user_id: currentUser.id, job_id: job.id });
+  }
+  isSaved = !isSaved;
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -52,7 +52,11 @@
   .job:hover{ border-color:var(--border-strong); }
   .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
   .job h3{ font-size:16px; font-weight:700; }
+  .job h3 a{ color:inherit; text-decoration:none; }
+  .job h3 a:hover{ text-decoration:underline; }
   .job .co{ font-size:12.5px; color:var(--text-dim); margin-top:3px; }
+  .save-btn{ background:none; border:1px solid var(--border-strong); border-radius:8px; width:34px; height:34px; font-size:16px; cursor:pointer; flex-shrink:0; }
+  .save-btn.saved{ background:rgba(216,90,48,0.1); border-color:var(--coral); }
   .badges{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
   .badge{ font-size:11px; padding:3px 10px; border-radius:20px; font-weight:500; }
   .badge.dur{ background:rgba(55,138,221,0.1); color:var(--blue-dark); }
@@ -117,6 +121,7 @@ function bucketFor(days, unit){
 }
 
 let jobs = [];
+let currentUser = null;
 
 const jobList = document.getElementById('jobList');
 const filterCity = document.getElementById('filterCity');
@@ -147,11 +152,15 @@ function render(){
     return;
   }
 
+  const contactHtml = currentUser
+    ? (j) => `<a href="tel:${j.phone}" class="apply" data-jobid="${j.id}">اتصل الآن</a>`
+    : (j) => `<a href="job.html?id=${j.id}" class="apply">سجل دخول لعرض الرقم</a>`;
+
   jobList.innerHTML = filtered.map(j => `
     <div class="job">
       <div class="top-row">
         <div>
-          <h3>${j.title}</h3>
+          <h3><a href="job.html?id=${j.id}">${j.title}</a></h3>
           <div class="co">${j.company_name || ''}</div>
           <div class="badges">
             <span class="badge dur">${j.duration} ${j.duration_unit || 'أيام'}</span>
@@ -160,17 +169,36 @@ function render(){
             ${j.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
           </div>
         </div>
+        <button class="save-btn" data-savejob="${j.id}" title="حفظ">🤍</button>
       </div>
       <div class="desc">${j.job_desc || ''}</div>
       <div class="bottom-row">
         <span class="wage">${j.wage || '—'} · ${j.city}</span>
-        <a href="tel:${j.phone}" class="apply">اتصل الآن</a>
+        ${contactHtml(j)}
       </div>
     </div>
   `).join('');
+
+  jobList.querySelectorAll('a[data-jobid]').forEach(link => {
+    link.addEventListener('click', async () => {
+      const id = link.dataset.jobid;
+      const jobObj = jobs.find(x => x.id == id);
+      await sb.from('jobs').update({ clicks: (jobObj.clicks || 0) + 1 }).eq('id', id);
+    });
+  });
+
+  jobList.querySelectorAll('button[data-savejob]').forEach(btn => {
+    btn.onclick = () => {
+      if(!currentUser){ window.location.href = 'post.html'; return; }
+      window.location.href = `job.html?id=${btn.dataset.savejob}`;
+    };
+  });
 }
 
 async function loadJobs(){
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session ? session.user : null;
+
   const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
   if(!error && data){
     jobs = data;
