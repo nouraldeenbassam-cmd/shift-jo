@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -94,34 +94,37 @@
 <div class="topbar">
   <div class="topbar-inner">
     <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
-    <div class="topbar-icons" id="topbarIcons"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
+      <div class="topbar-icons" id="topbarIcons"></div>
+    </div>
   </div>
 </div>
 <div class="wrap">
   <header>
-    <h1 style="margin-top:22px;">شواغر <em>قصيرة المدة</em>، بكل مكان</h1>
-    <p class="lead">من عمالة يومية لمهام تخصصية — دوّر شغلة تناسبك، أو انشر طلبك.</p>
+    <h1 style="margin-top:22px;" data-i18n="hero_title">Short-term shifts, anywhere</h1>
+    <p class="lead" data-i18n="hero_lead">From day labor to specialist tasks — post a request or find a shift that fits.</p>
 
     <div class="stat-row">
-      <div class="stat"><b id="statJobs">0</b><span>وظيفة متاحة</span></div>
-      <div class="stat"><b id="statCities">0</b><span>مدينة</span></div>
-      <div class="stat"><b id="statCats">0</b><span>مجال</span></div>
+      <div class="stat"><b id="statJobs">0</b><span data-i18n="stat_jobs">jobs available</span></div>
+      <div class="stat"><b id="statCities">0</b><span data-i18n="stat_cities">cities</span></div>
+      <div class="stat"><b id="statCats">0</b><span data-i18n="stat_cats">fields</span></div>
     </div>
 
-    <a href="post.html" class="post-cta">+ انشر إعلان عن وظيفة</a>
+    <a href="post.html" class="post-cta" data-i18n="post_cta">+ Post a job listing</a>
   </header>
 
   <div class="board-head">
-    <h2>الشواغر المتاحة</h2>
+    <h2 data-i18n="board_title">Available shifts</h2>
     <div class="board-filters">
-      <select id="filterCategory"><option value="">كل المجالات</option></select>
-      <select id="filterCity"><option value="">كل المدن</option></select>
-      <select id="filterDuration"><option value="">كل المدد</option></select>
+      <select id="filterCategory"><option value="" data-i18n="filter_all_cats">All fields</option></select>
+      <select id="filterCity"><option value="" data-i18n="filter_all_cities">All cities</option></select>
+      <select id="filterDuration"><option value="" data-i18n="filter_all_durations">All durations</option></select>
     </div>
   </div>
   <div class="job-list" id="jobList"></div>
 
-  <footer>شفت / Shift — منصة الشغل المؤقت</footer>
+  <footer data-i18n="footer_text">Shift — temporary staffing platform</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -129,6 +132,57 @@
 const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== i18n =====
+const I18N = {
+  en: {
+    hero_title: "Short-term shifts, anywhere",
+    hero_lead: "From day labor to specialist tasks — post a request or find a shift that fits.",
+    stat_jobs: "jobs available", stat_cities: "cities", stat_cats: "fields",
+    post_cta: "+ Post a job listing", board_title: "Available shifts",
+    filter_all_cats: "All fields", filter_all_cities: "All cities", filter_all_durations: "All durations",
+    footer_text: "Shift — temporary staffing platform",
+    call_now: "Call now", login_to_view: "Log in to view number", no_results: "No matching shifts — try different filters",
+    login_link: "Log in"
+  },
+  ar: {
+    hero_title: "شواغر قصيرة المدة، بكل مكان",
+    hero_lead: "من عمالة يومية لمهام تخصصية — انشر طلبك أو دوّر شغلة تناسبك.",
+    stat_jobs: "وظيفة متاحة", stat_cities: "مدينة", stat_cats: "مجال",
+    post_cta: "+ انشر إعلان عن وظيفة", board_title: "الشواغر المتاحة",
+    filter_all_cats: "كل المجالات", filter_all_cities: "كل المدن", filter_all_durations: "كل المدد",
+    footer_text: "شفت / Shift — منصة الشغل المؤقت",
+    call_now: "اتصل الآن", login_to_view: "سجل دخول لعرض الرقم", no_results: "ما فيه شواغر مطابقة — جرب تغيّر الفلتر",
+    login_link: "تسجيل دخول"
+  }
+};
+
+function getLang(){ return localStorage.getItem('shift_lang') || 'en'; }
+
+function applyLang(lang){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+  render();
+}
+
+async function setLang(lang){
+  localStorage.setItem('shift_lang', lang);
+  if(currentUser){
+    await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
+  }
+  applyLang(lang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
+});
+
 
 function bucketFor(days, unit){
   const d = unit === 'ساعات' ? Number(days) / 24 : Number(days);
@@ -145,7 +199,7 @@ function daysSince(dateStr){
 async function renderTopbar(user){
   const box = document.getElementById('topbarIcons');
   if(!user){
-    box.innerHTML = `<a href="post.html" class="login-link">تسجيل دخول</a>`;
+    box.innerHTML = `<a href="post.html" class="login-link">${I18N[getLang()].login_link}</a>`;
     return;
   }
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
@@ -188,12 +242,15 @@ const statCats = document.getElementById('statCats');
 function unique(arr){ return [...new Set(arr)]; }
 
 function populateFilters(){
-  filterCity.innerHTML = '<option value="">كل المدن</option>' + unique(jobs.map(j=>j.city)).map(c=>`<option value="${c}">${c}</option>`).join('');
-  filterDuration.innerHTML = '<option value="">كل المدد</option>' + ['1-3 أيام','4-7 أيام','8-14 يوم','15-30 يوم'].map(d=>`<option value="${d}">${d}</option>`).join('');
-  filterCategory.innerHTML = '<option value="">كل المجالات</option>' + unique(jobs.map(j=>j.category)).map(c=>`<option value="${c}">${c}</option>`).join('');
+  const t = I18N[getLang()];
+  filterCity.innerHTML = `<option value="">${t.filter_all_cities}</option>` + unique(jobs.map(j=>j.city)).map(c=>`<option value="${c}">${c}</option>`).join('');
+  filterDuration.innerHTML = `<option value="">${t.filter_all_durations}</option>` + ['1-3 أيام','4-7 أيام','8-14 يوم','15-30 يوم'].map(d=>`<option value="${d}">${d}</option>`).join('');
+  filterCategory.innerHTML = `<option value="">${t.filter_all_cats}</option>` + unique(jobs.map(j=>j.category)).map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
 function render(){
+  const lang = getLang();
+  const t = I18N[lang];
   const city = filterCity.value, dur = filterDuration.value, cat = filterCategory.value;
   const filtered = jobs.filter(j => (!city || j.city===city) && (!dur || bucketFor(j.duration, j.duration_unit)===dur) && (!cat || j.category===cat));
 
@@ -202,13 +259,13 @@ function render(){
   statCats.textContent = unique(jobs.map(j=>j.category)).length;
 
   if(filtered.length===0){
-    jobList.innerHTML = `<div class="empty">ما فيه شواغر مطابقة — جرب تغيّر الفلتر</div>`;
+    jobList.innerHTML = `<div class="empty">${t.no_results}</div>`;
     return;
   }
 
   const contactHtml = currentUser
-    ? (j) => `<a href="tel:${j.phone}" class="apply" data-jobid="${j.id}">اتصل الآن</a>`
-    : (j) => `<a href="job.html?id=${j.id}" class="apply">سجل دخول لعرض الرقم</a>`;
+    ? (j) => `<a href="tel:${j.phone}" class="apply" data-jobid="${j.id}">${t.call_now}</a>`
+    : (j) => `<a href="job.html?id=${j.id}" class="apply">${t.login_to_view}</a>`;
 
   jobList.innerHTML = filtered.map(j => `
     <div class="job">
@@ -252,6 +309,12 @@ function render(){
 async function loadJobs(){
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+
+  if(currentUser){
+    const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
+    if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);
+  }
+  applyLang(getLang());
   await renderTopbar(currentUser);
 
   const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
