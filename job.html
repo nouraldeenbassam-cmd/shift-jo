@@ -100,7 +100,8 @@ const I18N = {
     no_link: "No valid job link.",
     call_now: "Call now —", login_prompt: "Log in to see the contact number and call the company.",
     login_link: "Log in / Sign up", desc_empty: "No additional details.",
-    workers_needed: "worker(s) needed"
+    workers_needed: "worker(s) needed",
+    gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account"
   },
   ar: {
     back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
@@ -108,7 +109,8 @@ const I18N = {
     no_link: "ما فيه رابط وظيفة صحيح.",
     call_now: "اتصل الآن —", login_prompt: "لازم تسجل دخول حتى تقدر تشوف رقم التواصل وتتصلي بالشركة.",
     login_link: "تسجيل دخول / حساب جديد", desc_empty: "ما فيه تفاصيل إضافية.",
-    workers_needed: "عامل مطلوب"
+    workers_needed: "عامل مطلوب",
+    gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب"
   }
 };
 
@@ -158,14 +160,15 @@ async function renderTopbar(user){
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
   const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
 
+  const t = I18N[getLang()];
   box.innerHTML = `
-    <button id="bellBtn" class="icon-btn" title="الإشعارات">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
     <div class="gear-wrap">
-      <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
+      <button id="gearBtn" class="icon-btn" title="${t.account_title}">⚙️</button>
       <div id="gearMenu" class="gear-menu">
-        <a href="profile.html">الصفحة الشخصية</a>
-        <a href="settings.html">الإعدادات</a>
-        <button id="logoutBtn">تسجيل خروج</button>
+        <a href="profile.html">${t.gear_profile}</a>
+        <a href="settings.html">${t.gear_settings}</a>
+        <button id="logoutBtn">${t.gear_logout}</button>
       </div>
     </div>
   `;

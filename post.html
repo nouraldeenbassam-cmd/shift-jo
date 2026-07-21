@@ -237,7 +237,8 @@ const I18N = {
     login_link: "Log in", no_listings: "You haven't posted anything yet.", no_saved: "No saved jobs yet.",
     delete_btn: "Delete", remove_btn: "Remove", details_link: "Details",
     renew_prompt: "posted {days} days ago — is it still open?", renew_btn: "Still open — renew 7 days", close_btn: "Filled — delete",
-    applicants: "people clicked the number"
+    applicants: "people clicked the number",
+    gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account"
   },
   ar: {
     back_link: "← رجوع لكل الشواغر",
@@ -261,7 +262,8 @@ const I18N = {
     login_link: "تسجيل دخول", no_listings: "لسا ما نشرت أي إعلان.", no_saved: "ما فيه وظائف محفوظة لسا.",
     delete_btn: "حذف", remove_btn: "إزالة", details_link: "التفاصيل",
     renew_prompt: "مرق عليها {days} أيام — لسا متاحة الوظيفة؟", renew_btn: "لسا متاحة — جدد 7 أيام", close_btn: "خلص — احذف",
-    applicants: "شخص ضغط على الرقم"
+    applicants: "شخص ضغط على الرقم",
+    gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب"
   }
 };
 
@@ -402,14 +404,15 @@ async function renderTopbar(user){
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
   const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
 
+  const t = I18N[getLang()];
   box.innerHTML = `
-    <button id="bellBtn" class="icon-btn" title="الإشعارات">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
     <div class="gear-wrap">
-      <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
+      <button id="gearBtn" class="icon-btn" title="${t.account_title}">⚙️</button>
       <div id="gearMenu" class="gear-menu">
-        <a href="profile.html">الصفحة الشخصية</a>
-        <a href="settings.html">الإعدادات</a>
-        <button id="logoutBtn">تسجيل خروج</button>
+        <a href="profile.html">${t.gear_profile}</a>
+        <a href="settings.html">${t.gear_settings}</a>
+        <button id="logoutBtn">${t.gear_logout}</button>
       </div>
     </div>
   `;

@@ -92,13 +92,15 @@ const I18N = {
     back_link: "← Back to account", loading_text: "Loading...", lang_title: "Site language",
     lang_hint: "This preference is saved to your account and applies wherever you log in.",
     opt_en: "English", opt_ar: "العربية", saved_msg: "✓ Saved.", login_link: "Log in",
-    must_login: "You need to log in first."
+    must_login: "You need to log in first.",
+    gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account"
   },
   ar: {
     back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lang_title: "لغة الموقع",
     lang_hint: "هالإعداد بينحفظ بحسابك وبينطبق أي ما سجلت دخول.",
     opt_en: "English", opt_ar: "العربية", saved_msg: "✓ تم الحفظ.", login_link: "تسجيل دخول",
-    must_login: "لازم تسجل دخول أولاً."
+    must_login: "لازم تسجل دخول أولاً.",
+    gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب"
   }
 };
 
@@ -142,14 +144,15 @@ async function renderTopbar(user){
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
   const needsRenewal = (myJobs || []).filter(j => (Date.now() - new Date(j.renewed_at || j.created_at).getTime())/(1000*60*60*24) >= 7).length;
 
+  const t = I18N[getLang()];
   box.innerHTML = `
-    <button id="bellBtn" class="icon-btn" title="Notifications">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
     <div class="gear-wrap">
-      <button id="gearBtn" class="icon-btn" title="Account">⚙️</button>
+      <button id="gearBtn" class="icon-btn" title="${t.account_title}">⚙️</button>
       <div id="gearMenu" class="gear-menu">
-        <a href="profile.html">Profile</a>
-        <a href="settings.html">Settings</a>
-        <button id="logoutBtn">Log out</button>
+        <a href="profile.html">${t.gear_profile}</a>
+        <a href="settings.html">${t.gear_settings}</a>
+        <button id="logoutBtn">${t.gear_logout}</button>
       </div>
     </div>
   `;
