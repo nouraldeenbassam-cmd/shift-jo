@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -81,12 +81,15 @@
 <div class="topbar">
   <div class="topbar-inner">
     <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
-    <div class="topbar-icons" id="topbarIcons"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
+      <div class="topbar-icons" id="topbarIcons"></div>
+    </div>
   </div>
 </div>
 <div class="wrap">
   <header>
-    <a href="index.html" class="back-link">← رجوع لكل الشواغر</a>
+    <a href="index.html" class="back-link" data-i18n="back_link">← Back to all shifts</a>
   </header>
 
   <div class="panel">
@@ -94,43 +97,43 @@
     <!-- Logged out: login/signup -->
     <div id="authForms">
       <div class="tabs">
-        <div class="tab active" id="tabLogin">تسجيل دخول</div>
-        <div class="tab" id="tabSignup">حساب جديد</div>
+        <div class="tab active" id="tabLogin" data-i18n="tab_login">Log in</div>
+        <div class="tab" id="tabSignup" data-i18n="tab_signup">Sign up</div>
       </div>
 
       <form id="loginForm">
-        <div class="field"><label>الإيميل</label><input type="email" id="loginEmail" required></div>
-        <div class="field"><label>كلمة السر</label><input type="password" id="loginPassword" required></div>
-        <button type="submit" class="btn">تسجيل دخول</button>
+        <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="loginEmail" required></div>
+        <div class="field"><label data-i18n="lbl_password">Password</label><input type="password" id="loginPassword" required></div>
+        <button type="submit" class="btn" data-i18n="btn_login">Log in</button>
         <div class="form-msg" id="loginMsg"></div>
         <div style="text-align:center; margin-top:12px;">
-          <a href="#" id="forgotLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">نسيت كلمة السر؟</a>
+          <a href="#" id="forgotLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;" data-i18n="forgot_link">Forgot your password?</a>
         </div>
       </form>
 
       <form id="resetForm" style="display:none;">
-        <div class="hint" style="margin-bottom:14px;">اكتب إيميلك وبنبعتلك رابط لتعيين كلمة سر جديدة.</div>
-        <div class="field"><label>الإيميل</label><input type="email" id="resetEmail" required></div>
-        <button type="submit" class="btn">إرسال رابط إعادة التعيين</button>
+        <div class="hint" style="margin-bottom:14px;" data-i18n="reset_hint">Enter your email and we'll send you a link to set a new password.</div>
+        <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="resetEmail" required></div>
+        <button type="submit" class="btn" data-i18n="btn_send_reset">Send reset link</button>
         <div class="form-msg" id="resetMsg"></div>
         <div style="text-align:center; margin-top:12px;">
-          <a href="#" id="backToLoginLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;">رجوع لتسجيل الدخول</a>
+          <a href="#" id="backToLoginLink" style="font-size:12.5px; color:var(--text-dim); text-decoration:underline;" data-i18n="back_to_login">Back to log in</a>
         </div>
       </form>
 
       <form id="newPasswordForm" style="display:none;">
-        <h2>تعيين كلمة سر جديدة</h2>
-        <div class="hint">اكتب كلمة السر الجديدة لحسابك.</div>
-        <div class="field"><label>كلمة السر الجديدة</label><input type="password" id="newPassword" required minlength="6"></div>
-        <button type="submit" class="btn">حفظ كلمة السر</button>
+        <h2 data-i18n="new_pw_title">Set a new password</h2>
+        <div class="hint" data-i18n="new_pw_hint">Enter a new password for your account.</div>
+        <div class="field"><label data-i18n="lbl_new_password">New password</label><input type="password" id="newPassword" required minlength="6"></div>
+        <button type="submit" class="btn" data-i18n="btn_save_password">Save password</button>
         <div class="form-msg" id="newPasswordMsg"></div>
       </form>
 
       <form id="signupForm" style="display:none;">
-        <div class="field"><label>الاسم</label><input type="text" id="signupName" required></div>
-        <div class="field"><label>الإيميل</label><input type="email" id="signupEmail" required></div>
-        <div class="field"><label>كلمة السر</label><input type="password" id="signupPassword" required minlength="6"></div>
-        <button type="submit" class="btn">إنشاء حساب</button>
+        <div class="field"><label data-i18n="lbl_name">Name</label><input type="text" id="signupName" required></div>
+        <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="signupEmail" required></div>
+        <div class="field"><label data-i18n="lbl_password">Password</label><input type="password" id="signupPassword" required minlength="6"></div>
+        <button type="submit" class="btn" data-i18n="btn_signup">Create account</button>
         <div class="form-msg" id="signupMsg"></div>
       </form>
     </div>
@@ -141,67 +144,67 @@
         <span id="whoName"></span>
       </div>
 
-      <h2>انشر طلب عمال</h2>
-      <div class="hint">طلبك بيظهر مباشرة بالصفحة الرئيسية لكل الزوار.</div>
+      <h2 data-i18n="post_job_title">Post a job listing</h2>
+      <div class="hint" data-i18n="post_job_hint">Your listing appears on the homepage for every visitor.</div>
       <form id="jobForm">
-        <div class="field"><label>عنوان الوظيفة</label><input type="text" id="fTitle" required placeholder="مثال: مختص دعم IT ليوم واحد"></div>
-        <div class="field"><label>المجال</label>
+        <div class="field"><label data-i18n="lbl_job_title">Job title</label><input type="text" id="fTitle" required></div>
+        <div class="field"><label data-i18n="lbl_category">Category</label>
           <select id="fCategory">
-            <option selected>عمالة يدوية</option>
-            <option>تقنية / IT</option>
-            <option>إداري / مكتبي</option>
-            <option>ضيافة / مطاعم</option>
-            <option>تعليم / تدريب</option>
-            <option>تصميم / محتوى</option>
-            <option>أخرى</option>
+            <option value="عمالة يدوية" selected data-i18n="cat_manual">Manual labor</option>
+            <option value="تقنية / IT" data-i18n="cat_it">Tech / IT</option>
+            <option value="إداري / مكتبي" data-i18n="cat_admin">Admin / Office</option>
+            <option value="ضيافة / مطاعم" data-i18n="cat_hospitality">Hospitality / Restaurants</option>
+            <option value="تعليم / تدريب" data-i18n="cat_edu">Education / Training</option>
+            <option value="تصميم / محتوى" data-i18n="cat_design">Design / Content</option>
+            <option value="أخرى" data-i18n="cat_other">Other</option>
           </select>
         </div>
         <div class="field row2">
-          <div><label>المدة</label>
+          <div><label data-i18n="lbl_duration">Duration</label>
             <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
               <input type="number" id="fDurationNum" min="1" value="1">
               <select id="fDurationUnit">
-                <option value="ساعات">ساعات</option>
-                <option value="أيام" selected>أيام</option>
+                <option value="ساعات" data-i18n="unit_hours">hours</option>
+                <option value="أيام" selected data-i18n="unit_days">days</option>
               </select>
             </div>
           </div>
-          <div><label>المدينة</label>
+          <div><label data-i18n="lbl_city">City</label>
             <select id="fCity">
-              <option>عمّان</option>
-              <option>إربد</option>
-              <option>البلقاء</option>
-              <option>جرش</option>
-              <option>الزرقاء</option>
-              <option>الطفيلة</option>
-              <option>عجلون</option>
-              <option>العقبة</option>
-              <option>الكرك</option>
-              <option>مادبا</option>
-              <option>المفرق</option>
-              <option>معان</option>
+              <option value="عمّان" data-i18n="city_amman">Amman</option>
+              <option value="إربد" data-i18n="city_irbid">Irbid</option>
+              <option value="البلقاء" data-i18n="city_balqa">Balqa</option>
+              <option value="جرش" data-i18n="city_jerash">Jerash</option>
+              <option value="الزرقاء" data-i18n="city_zarqa">Zarqa</option>
+              <option value="الطفيلة" data-i18n="city_tafilah">Tafilah</option>
+              <option value="عجلون" data-i18n="city_ajloun">Ajloun</option>
+              <option value="العقبة" data-i18n="city_aqaba">Aqaba</option>
+              <option value="الكرك" data-i18n="city_karak">Karak</option>
+              <option value="مادبا" data-i18n="city_madaba">Madaba</option>
+              <option value="المفرق" data-i18n="city_mafraq">Mafraq</option>
+              <option value="معان" data-i18n="city_maan">Ma'an</option>
             </select>
           </div>
         </div>
-        <div class="field"><label>عدد العمال المطلوب</label><input type="number" id="fCount" min="1" value="1"></div>
-        <div class="field"><label>الأجر اليومي (تقريبي)</label><input type="text" id="fWage"></div>
-        <div class="field"><label>رقم التواصل</label><input type="tel" id="fPhone" required placeholder="مثال: 07XXXXXXXX"></div>
-        <div class="field"><label>تفاصيل إضافية</label><textarea id="fDesc" placeholder="ساعات الدوام، شروط..."></textarea></div>
+        <div class="field"><label data-i18n="lbl_count">Workers needed</label><input type="number" id="fCount" min="1" value="1"></div>
+        <div class="field"><label data-i18n="lbl_wage">Daily wage (approx.)</label><input type="text" id="fWage"></div>
+        <div class="field"><label data-i18n="lbl_phone">Contact number</label><input type="tel" id="fPhone" required></div>
+        <div class="field"><label data-i18n="lbl_details">Additional details</label><textarea id="fDesc"></textarea></div>
         <div class="checks">
-          <label><input type="checkbox" id="fUrgent">مستعجل</label>
-          <label><input type="checkbox" id="fSkilled">يتطلب شهادة/تخصص</label>
+          <label><input type="checkbox" id="fUrgent"><span data-i18n="chk_urgent">Urgent</span></label>
+          <label><input type="checkbox" id="fSkilled"><span data-i18n="chk_skilled">Requires certification</span></label>
         </div>
-        <button type="submit" class="btn">انشر الطلب</button>
+        <button type="submit" class="btn" data-i18n="btn_post">Post listing</button>
         <div class="form-msg" id="formMsg"></div>
       </form>
 
       <div class="my-jobs" id="myJobsSection">
-        <h2>إعلاناتك المنشورة</h2>
+        <h2 data-i18n="my_jobs_title">Your listings</h2>
         <div id="myJobsList"></div>
       </div>
 
       <div class="my-jobs">
-        <h2>الوظائف المحفوظة</h2>
+        <h2 data-i18n="saved_jobs_title">Saved jobs</h2>
         <div id="savedJobsList"></div>
       </div>
     </div>
@@ -211,6 +214,83 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const I18N = {
+  en: {
+    back_link: "← Back to all shifts",
+    tab_login: "Log in", tab_signup: "Sign up",
+    lbl_email: "Email", lbl_password: "Password", lbl_name: "Name", lbl_new_password: "New password",
+    btn_login: "Log in", btn_signup: "Create account", btn_send_reset: "Send reset link", btn_save_password: "Save password",
+    forgot_link: "Forgot your password?", back_to_login: "Back to log in",
+    reset_hint: "Enter your email and we'll send you a link to set a new password.",
+    new_pw_title: "Set a new password", new_pw_hint: "Enter a new password for your account.",
+    post_job_title: "Post a job listing", post_job_hint: "Your listing appears on the homepage for every visitor.",
+    lbl_job_title: "Job title", lbl_category: "Category", lbl_duration: "Duration", lbl_city: "City",
+    lbl_count: "Workers needed", lbl_wage: "Daily wage (approx.)", lbl_phone: "Contact number", lbl_details: "Additional details",
+    chk_urgent: "Urgent", chk_skilled: "Requires certification", btn_post: "Post listing",
+    cat_manual: "Manual labor", cat_it: "Tech / IT", cat_admin: "Admin / Office", cat_hospitality: "Hospitality / Restaurants",
+    cat_edu: "Education / Training", cat_design: "Design / Content", cat_other: "Other",
+    unit_hours: "hours", unit_days: "days",
+    city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
+    city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
+    city_mafraq: "Mafraq", city_maan: "Ma'an",
+    my_jobs_title: "Your listings", saved_jobs_title: "Saved jobs",
+    login_link: "Log in", no_listings: "You haven't posted anything yet.", no_saved: "No saved jobs yet.",
+    delete_btn: "Delete", remove_btn: "Remove", details_link: "Details",
+    renew_prompt: "posted {days} days ago — is it still open?", renew_btn: "Still open — renew 7 days", close_btn: "Filled — delete",
+    applicants: "people clicked the number"
+  },
+  ar: {
+    back_link: "← رجوع لكل الشواغر",
+    tab_login: "تسجيل دخول", tab_signup: "حساب جديد",
+    lbl_email: "الإيميل", lbl_password: "كلمة السر", lbl_name: "الاسم", lbl_new_password: "كلمة السر الجديدة",
+    btn_login: "تسجيل دخول", btn_signup: "إنشاء حساب", btn_send_reset: "إرسال رابط إعادة التعيين", btn_save_password: "حفظ كلمة السر",
+    forgot_link: "نسيت كلمة السر؟", back_to_login: "رجوع لتسجيل الدخول",
+    reset_hint: "اكتب إيميلك وبنبعتلك رابط لتعيين كلمة سر جديدة.",
+    new_pw_title: "تعيين كلمة سر جديدة", new_pw_hint: "اكتب كلمة السر الجديدة لحسابك.",
+    post_job_title: "انشر طلب عمال", post_job_hint: "طلبك بيظهر مباشرة بالصفحة الرئيسية لكل الزوار.",
+    lbl_job_title: "عنوان الوظيفة", lbl_category: "المجال", lbl_duration: "المدة", lbl_city: "المدينة",
+    lbl_count: "عدد العمال المطلوب", lbl_wage: "الأجر اليومي (تقريبي)", lbl_phone: "رقم التواصل", lbl_details: "تفاصيل إضافية",
+    chk_urgent: "مستعجل", chk_skilled: "يتطلب شهادة/تخصص", btn_post: "انشر الطلب",
+    cat_manual: "عمالة يدوية", cat_it: "تقنية / IT", cat_admin: "إداري / مكتبي", cat_hospitality: "ضيافة / مطاعم",
+    cat_edu: "تعليم / تدريب", cat_design: "تصميم / محتوى", cat_other: "أخرى",
+    unit_hours: "ساعات", unit_days: "أيام",
+    city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
+    city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
+    city_mafraq: "المفرق", city_maan: "معان",
+    my_jobs_title: "إعلاناتك المنشورة", saved_jobs_title: "الوظائف المحفوظة",
+    login_link: "تسجيل دخول", no_listings: "لسا ما نشرت أي إعلان.", no_saved: "ما فيه وظائف محفوظة لسا.",
+    delete_btn: "حذف", remove_btn: "إزالة", details_link: "التفاصيل",
+    renew_prompt: "مرق عليها {days} أيام — لسا متاحة الوظيفة؟", renew_btn: "لسا متاحة — جدد 7 أيام", close_btn: "خلص — احذف",
+    applicants: "شخص ضغط على الرقم"
+  }
+};
+
+function getLang(){ return localStorage.getItem('shift_lang') || 'en'; }
+
+function applyLang(lang){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+  if(currentUser){ loadMyJobs(); loadSavedJobs(); }
+}
+
+async function setLang(lang){
+  localStorage.setItem('shift_lang', lang);
+  if(currentUser){
+    await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
+  }
+  applyLang(lang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
+});
+
 const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -316,7 +396,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 async function renderTopbar(user){
   const box = document.getElementById('topbarIcons');
   if(!user){
-    box.innerHTML = `<a href="post.html" class="login-link">تسجيل دخول</a>`;
+    box.innerHTML = `<a href="post.html" class="login-link">${I18N[getLang()].login_link}</a>`;
     return;
   }
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
@@ -328,7 +408,7 @@ async function renderTopbar(user){
       <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
       <div id="gearMenu" class="gear-menu">
         <a href="profile.html">الصفحة الشخصية</a>
-        <a href="post.html">الإعدادات</a>
+        <a href="settings.html">الإعدادات</a>
         <button id="logoutBtn">تسجيل خروج</button>
       </div>
     </div>
@@ -365,6 +445,11 @@ async function loadSession(){
 
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  if(currentUser){
+    const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
+    if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);
+  }
+  applyLang(getLang());
   await renderTopbar(currentUser);
 
   if(!currentUser){
@@ -428,10 +513,11 @@ function daysSince(dateStr){
 }
 
 async function loadMyJobs(){
+  const t = I18N[getLang()];
   const { data, error } = await sb.from('jobs').select('*').eq('company_id', currentUser.id).order('created_at', { ascending: false });
   const list = document.getElementById('myJobsList');
   if(error || !data || data.length === 0){
-    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">لسا ما نشرت أي إعلان.</div>`;
+    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">${t.no_listings}</div>`;
     document.getElementById('bellCount').style.display = 'none';
     return;
   }
@@ -452,11 +538,11 @@ async function loadMyJobs(){
         <div class="my-job" data-jobid="${j.id}" style="flex-direction:column; align-items:stretch; border-color:var(--coral); background:#FFF8F5;">
           <div style="margin-bottom:8px;">
             <div class="t">${j.title}</div>
-            <div class="c">${j.city} · مرق عليها ${Math.floor(age)} أيام — لسا متاحة الوظيفة؟</div>
+            <div class="c">${j.city} · ${t.renew_prompt.replace('{days}', Math.floor(age))}</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button data-renew="${j.id}" style="flex:1; background:var(--green); color:#fff; border:none; padding:7px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">لسا متاحة — جدد 7 أيام</button>
-            <button data-id="${j.id}" style="flex:1; background:none; border:1px solid var(--coral); color:var(--coral);">خلص — احذف</button>
+            <button data-renew="${j.id}" style="flex:1; background:var(--green); color:#fff; border:none; padding:7px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">${t.renew_btn}</button>
+            <button data-id="${j.id}" style="flex:1; background:none; border:1px solid var(--coral); color:var(--coral);">${t.close_btn}</button>
           </div>
         </div>`;
     }
@@ -464,9 +550,9 @@ async function loadMyJobs(){
     <div class="my-job">
       <div>
         <div class="t">${j.title}</div>
-        <div class="c">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'} · ${j.clicks || 0} شخص ضغط على الرقم</div>
+        <div class="c">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'} · ${j.clicks || 0} ${t.applicants}</div>
       </div>
-      <button data-id="${j.id}">حذف</button>
+      <button data-id="${j.id}">${t.delete_btn}</button>
     </div>
   `;
   }).join('');
@@ -486,10 +572,11 @@ async function loadMyJobs(){
 }
 
 async function loadSavedJobs(){
+  const t = I18N[getLang()];
   const list = document.getElementById('savedJobsList');
   const { data, error } = await sb.from('saved_jobs').select('job_id, jobs(*)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
   if(error || !data || data.length === 0){
-    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">ما فيه وظائف محفوظة لسا.</div>`;
+    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">${t.no_saved}</div>`;
     return;
   }
   list.innerHTML = data.filter(r => r.jobs).map(r => `
@@ -499,8 +586,8 @@ async function loadSavedJobs(){
         <div class="c">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
       </div>
       <div style="display:flex; gap:6px;">
-        <a href="job.html?id=${r.job_id}" style="font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center;">التفاصيل</a>
-        <button data-unsave="${r.job_id}">إزالة</button>
+        <a href="job.html?id=${r.job_id}" style="font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center;">${t.details_link}</a>
+        <button data-unsave="${r.job_id}">${t.remove_btn}</button>
       </div>
     </div>
   `).join('');

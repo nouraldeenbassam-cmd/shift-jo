@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الصفحة الشخصية — شفت / Shift</title>
+<title>Settings — Shift</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
   :root{
@@ -37,25 +37,16 @@
   .gear-menu button{ color:var(--coral); border-top:1px solid var(--border); }
   .login-link{ font-size:12.5px; color:var(--blue-dark); text-decoration:none; font-weight:600; }
 
-  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; text-align:center; }
-  .avatar{ width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-size:26px; font-weight:900; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; }
+  .panel h2{ font-size:16px; font-weight:700; margin-bottom:4px; }
+  .panel .hint{ color:var(--text-dim); font-size:12.5px; margin-bottom:16px; }
 
-  .field{ margin-bottom:14px; text-align:right; }
-  .field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:5px; font-weight:500; }
-  .field input{
-    width:100%; background:var(--bg); border:1px solid var(--border-strong); color:var(--text);
-    padding:9px 11px; border-radius:8px; font-family:var(--sans); font-size:14px;
-  }
-  .field input:disabled{ color:var(--text-dim); }
-  .field input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(55,138,221,0.12); }
+  .lang-options{ display:flex; gap:10px; }
+  .lang-opt{ flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:14px; text-align:center; cursor:pointer; font-weight:600; font-size:14px; }
+  .lang-opt.active{ border-color:var(--blue); background:rgba(55,138,221,0.08); color:var(--blue-dark); }
 
-  .btn{ width:100%; background:var(--blue); color:#fff; border:none; padding:12px; font-weight:700; font-size:14.5px; border-radius:8px; cursor:pointer; margin-top:6px; }
-  .btn:hover{ background:var(--blue-dark); }
-  .form-msg{ font-size:12px; margin-top:10px; display:none; font-weight:500; }
+  .form-msg{ font-size:12px; margin-top:12px; display:none; font-weight:500; }
   .form-msg.ok{ color:var(--green-dark); }
-  .form-msg.err{ color:var(--coral); }
-
-  .meta-row{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
 
   .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; }
 </style>
@@ -77,18 +68,14 @@
 
   <div id="loading" class="loading" data-i18n="loading_text">Loading...</div>
 
-  <div class="panel" id="profileCard" style="display:none;">
-    <div class="avatar" id="avatarLetter"></div>
-    <form id="profileForm">
-      <div class="field"><label data-i18n="lbl_name">Name</label><input type="text" id="pName" required></div>
-      <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="pEmail" disabled></div>
-      <button type="submit" class="btn" data-i18n="btn_save">Save changes</button>
-      <div class="form-msg" id="profileMsg"></div>
-    </form>
-    <div class="meta-row">
-      <span id="joinDate"></span>
-      <span data-i18n="member_since">Member since</span>
+  <div class="panel" id="settingsCard" style="display:none;">
+    <h2 data-i18n="lang_title">Site language</h2>
+    <div class="hint" data-i18n="lang_hint">This preference is saved to your account and applies wherever you log in.</div>
+    <div class="lang-options">
+      <div class="lang-opt" id="optEn" data-i18n="opt_en">English</div>
+      <div class="lang-opt" id="optAr" data-i18n="opt_ar">العربية</div>
     </div>
+    <div class="form-msg" id="settingsMsg"></div>
   </div>
 </div>
 
@@ -100,19 +87,17 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 
-function daysSince(dateStr){
-  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
-}
-
 const I18N = {
   en: {
-    back_link: "← Back to account", loading_text: "Loading...", lbl_name: "Name", lbl_email: "Email",
-    btn_save: "Save changes", member_since: "Member since", login_link: "Log in", saved_msg: "✓ Saved.",
+    back_link: "← Back to account", loading_text: "Loading...", lang_title: "Site language",
+    lang_hint: "This preference is saved to your account and applies wherever you log in.",
+    opt_en: "English", opt_ar: "العربية", saved_msg: "✓ Saved.", login_link: "Log in",
     must_login: "You need to log in first."
   },
   ar: {
-    back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lbl_name: "الاسم", lbl_email: "الإيميل",
-    btn_save: "حفظ التعديلات", member_since: "عضو منذ", login_link: "تسجيل دخول", saved_msg: "✓ تم الحفظ.",
+    back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lang_title: "لغة الموقع",
+    lang_hint: "هالإعداد بينحفظ بحسابك وبينطبق أي ما سجلت دخول.",
+    opt_en: "English", opt_ar: "العربية", saved_msg: "✓ تم الحفظ.", login_link: "تسجيل دخول",
     must_login: "لازم تسجل دخول أولاً."
   }
 };
@@ -128,18 +113,24 @@ function applyLang(lang){
   });
   const btn = document.getElementById('langBtn');
   if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('optEn').classList.toggle('active', lang === 'en');
+  document.getElementById('optAr').classList.toggle('active', lang === 'ar');
 }
 
 async function setLang(lang){
   localStorage.setItem('shift_lang', lang);
   if(currentUser){
     await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
+    const msg = document.getElementById('settingsMsg');
+    msg.style.display = 'block'; msg.className = 'form-msg ok'; msg.textContent = I18N[lang].saved_msg;
   }
   applyLang(lang);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
+  document.getElementById('optEn').onclick = () => setLang('en');
+  document.getElementById('optAr').onclick = () => setLang('ar');
 });
 
 async function renderTopbar(user){
@@ -149,16 +140,16 @@ async function renderTopbar(user){
     return;
   }
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
-  const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
+  const needsRenewal = (myJobs || []).filter(j => (Date.now() - new Date(j.renewed_at || j.created_at).getTime())/(1000*60*60*24) >= 7).length;
 
   box.innerHTML = `
-    <button id="bellBtn" class="icon-btn" title="الإشعارات">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <button id="bellBtn" class="icon-btn" title="Notifications">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
     <div class="gear-wrap">
-      <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
+      <button id="gearBtn" class="icon-btn" title="Account">⚙️</button>
       <div id="gearMenu" class="gear-menu">
-        <a href="profile.html">الصفحة الشخصية</a>
-        <a href="settings.html">الإعدادات</a>
-        <button id="logoutBtn">تسجيل خروج</button>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+        <button id="logoutBtn">Log out</button>
       </div>
     </div>
   `;
@@ -179,50 +170,23 @@ async function init(){
   currentUser = session ? session.user : null;
 
   if(currentUser){
-    const { data: langProfile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
-    if(langProfile && langProfile.lang) localStorage.setItem('shift_lang', langProfile.lang);
+    const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
+    if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);
   }
   applyLang(getLang());
   await renderTopbar(currentUser);
 
+  document.getElementById('loading').style.display = 'none';
+
   if(!currentUser){
+    document.getElementById('loading').style.display = 'block';
     document.getElementById('loading').textContent = I18N[getLang()].must_login;
     setTimeout(() => window.location.href = 'post.html', 1200);
     return;
   }
 
-  let { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if(!profile){
-    const meta = currentUser.user_metadata || {};
-    const { data: created } = await sb.from('profiles')
-      .upsert({ id: currentUser.id, full_name: meta.full_name || currentUser.email })
-      .select().single();
-    profile = created;
-  }
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('profileCard').style.display = 'block';
-
-  const name = profile ? profile.full_name : currentUser.email;
-  document.getElementById('avatarLetter').textContent = name ? name.trim().charAt(0) : '?';
-  document.getElementById('pName').value = name || '';
-  document.getElementById('pEmail').value = currentUser.email;
-
-  const joined = new Date(currentUser.created_at);
-  const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
-  document.getElementById('joinDate').textContent = joined.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('settingsCard').style.display = 'block';
 }
-
-document.getElementById('profileForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const msg = document.getElementById('profileMsg');
-  msg.style.display = 'block'; msg.className = 'form-msg'; msg.textContent = '...';
-  const newName = document.getElementById('pName').value;
-  const { error } = await sb.from('profiles').update({ full_name: newName }).eq('id', currentUser.id);
-  if(error){ msg.className = 'form-msg err'; msg.textContent = error.message; return; }
-  msg.className = 'form-msg ok'; msg.textContent = I18N[getLang()].saved_msg;
-  document.getElementById('avatarLetter').textContent = newName.trim().charAt(0);
-});
 
 init();
 </script>

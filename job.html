@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,15 +72,18 @@
 <div class="topbar">
   <div class="topbar-inner">
     <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
-    <div class="topbar-icons" id="topbarIcons"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
+      <div class="topbar-icons" id="topbarIcons"></div>
+    </div>
   </div>
 </div>
 <div class="wrap">
   <header>
-    <a href="index.html" class="back-link">← رجوع لكل الشواغر</a>
+    <a href="index.html" class="back-link" data-i18n="back_link">← Back to all shifts</a>
   </header>
 
-  <div id="loading" class="loading">جاري التحميل...</div>
+  <div id="loading" class="loading" data-i18n="loading_text">Loading...</div>
   <div class="card" id="jobCard" style="display:none;"></div>
 </div>
 
@@ -89,6 +92,51 @@
 const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const I18N = {
+  en: {
+    back_link: "← Back to all shifts", loading_text: "Loading...",
+    not_found: "This job isn't available anymore (it may have been deleted or expired).",
+    no_link: "No valid job link.",
+    call_now: "Call now —", login_prompt: "Log in to see the contact number and call the company.",
+    login_link: "Log in / Sign up", desc_empty: "No additional details.",
+    workers_needed: "worker(s) needed"
+  },
+  ar: {
+    back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
+    not_found: "هاي الوظيفة مش موجودة (يمكن انحذفت أو خلصت مدتها).",
+    no_link: "ما فيه رابط وظيفة صحيح.",
+    call_now: "اتصل الآن —", login_prompt: "لازم تسجل دخول حتى تقدر تشوف رقم التواصل وتتصلي بالشركة.",
+    login_link: "تسجيل دخول / حساب جديد", desc_empty: "ما فيه تفاصيل إضافية.",
+    workers_needed: "عامل مطلوب"
+  }
+};
+
+function getLang(){ return localStorage.getItem('shift_lang') || 'en'; }
+
+function applyLang(lang){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+  if(job) render();
+}
+
+async function setLang(lang){
+  localStorage.setItem('shift_lang', lang);
+  if(currentUser){
+    await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
+  }
+  applyLang(lang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
+});
 
 const params = new URLSearchParams(window.location.search);
 const jobId = params.get('id');
@@ -104,7 +152,7 @@ function daysSince(dateStr){
 async function renderTopbar(user){
   const box = document.getElementById('topbarIcons');
   if(!user){
-    box.innerHTML = `<a href="post.html" class="login-link">تسجيل دخول</a>`;
+    box.innerHTML = `<a href="post.html" class="login-link">${I18N[getLang()].login_link}</a>`;
     return;
   }
   const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
@@ -116,7 +164,7 @@ async function renderTopbar(user){
       <button id="gearBtn" class="icon-btn" title="الحساب">⚙️</button>
       <div id="gearMenu" class="gear-menu">
         <a href="profile.html">الصفحة الشخصية</a>
-        <a href="post.html">الإعدادات</a>
+        <a href="settings.html">الإعدادات</a>
         <button id="logoutBtn">تسجيل خروج</button>
       </div>
     </div>
@@ -136,16 +184,22 @@ async function renderTopbar(user){
 async function init(){
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+
+  if(currentUser){
+    const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
+    if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);
+  }
+  applyLang(getLang());
   await renderTopbar(currentUser);
 
   if(!jobId){
-    document.getElementById('loading').textContent = 'ما فيه رابط وظيفة صحيح.';
+    document.getElementById('loading').textContent = I18N[getLang()].no_link;
     return;
   }
 
   const { data, error } = await sb.from('jobs').select('*').eq('id', jobId).single();
   if(error || !data){
-    document.getElementById('loading').textContent = 'هاي الوظيفة مش موجودة (يمكن انحذفت أو خلصت مدتها).';
+    document.getElementById('loading').textContent = I18N[getLang()].not_found;
     return;
   }
   job = data;
@@ -159,19 +213,20 @@ async function init(){
 }
 
 function render(){
+  const t = I18N[getLang()];
   document.getElementById('loading').style.display = 'none';
   const card = document.getElementById('jobCard');
   card.style.display = 'block';
 
   const contactHtml = currentUser ? `
     <div class="contact-box">
-      <a href="tel:${job.phone}" class="btn call" id="callBtn">اتصل الآن — ${job.phone}</a>
+      <a href="tel:${job.phone}" class="btn call" id="callBtn">${t.call_now} ${job.phone}</a>
     </div>
   ` : `
     <div class="contact-box">
       <div class="contact-locked">
-        <p>لازم تسجل دخول حتى تقدر تشوف رقم التواصل وتتصلي بالشركة.</p>
-        <a href="post.html" class="btn">تسجيل دخول / حساب جديد</a>
+        <p>${t.login_prompt}</p>
+        <a href="post.html" class="btn">${t.login_link}</a>
       </div>
     </div>
   `;
@@ -191,8 +246,8 @@ function render(){
       ${job.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
     </div>
     <div class="wage">${job.wage || '—'}</div>
-    <div class="city">${job.city} · ${job.count || 1} عامل مطلوب</div>
-    <div class="desc">${job.job_desc ? job.job_desc : '<span class="desc-empty">ما فيه تفاصيل إضافية.</span>'}</div>
+    <div class="city">${job.city} · ${job.count || 1} ${t.workers_needed}</div>
+    <div class="desc">${job.job_desc ? job.job_desc : `<span class="desc-empty">${t.desc_empty}</span>`}</div>
     ${contactHtml}
   `;
 
