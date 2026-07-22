@@ -116,7 +116,7 @@ const I18N = {
     city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
     city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
     city_mafraq: "Mafraq", city_maan: "Ma'an",
-    badge_urgent: "Urgent", badge_skilled: "Requires certification"
+    badge_urgent: "Urgent", badge_skilled: "Requires certification", currency: "JOD"
   },
   ar: {
     back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
@@ -133,7 +133,7 @@ const I18N = {
     city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
     city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
     city_mafraq: "المفرق", city_maan: "معان",
-    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة"
+    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة", currency: "دينار"
   }
 };
 
@@ -279,7 +279,7 @@ function render(){
       ${job.urgent ? `<span class="badge urgent">${t.badge_urgent}</span>` : ''}
       ${job.skilled ? `<span class="badge skilled">${t.badge_skilled}</span>` : ''}
     </div>
-    <div class="wage" dir="auto">${job.wage || '—'}</div>
+    <div class="wage" dir="auto">${job.wage ? job.wage + ' ' + t.currency : '—'}</div>
     <div class="city" dir="auto">${tCity(job.city, t)} · ${job.count || 1} ${t.workers_needed}</div>
     <div class="desc" dir="auto">${job.job_desc ? job.job_desc : `<span class="desc-empty">${t.desc_empty}</span>`}</div>
     ${contactHtml}

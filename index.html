@@ -165,7 +165,8 @@ const I18N = {
     city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
     city_mafraq: "Mafraq", city_maan: "Ma'an",
     badge_urgent: "Urgent", badge_skilled: "Requires certification",
-    bucket_1_3: "1-3 days", bucket_4_7: "4-7 days", bucket_8_14: "8-14 days", bucket_15_30: "15-30 days"
+    bucket_1_3: "1-3 days", bucket_4_7: "4-7 days", bucket_8_14: "8-14 days", bucket_15_30: "15-30 days",
+    currency: "JOD"
   },
   ar: {
     hero_title: "شواغر قصيرة المدة، بكل مكان",
@@ -185,7 +186,8 @@ const I18N = {
     city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
     city_mafraq: "المفرق", city_maan: "معان",
     badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة",
-    bucket_1_3: "1-3 أيام", bucket_4_7: "4-7 أيام", bucket_8_14: "8-14 يوم", bucket_15_30: "15-30 يوم"
+    bucket_1_3: "1-3 أيام", bucket_4_7: "4-7 أيام", bucket_8_14: "8-14 يوم", bucket_15_30: "15-30 يوم",
+    currency: "دينار"
   }
 };
 
@@ -326,7 +328,7 @@ function render(){
       </div>
       <div class="desc" dir="auto">${j.job_desc || ''}</div>
       <div class="bottom-row">
-        <span class="wage" dir="auto">${j.wage || '—'} · ${tCity(j.city, t)}</span>
+        <span class="wage" dir="auto">${j.wage ? j.wage + ' ' + t.currency : '—'} · ${tCity(j.city, t)}</span>
         ${contactHtml(j)}
       </div>
     </div>
