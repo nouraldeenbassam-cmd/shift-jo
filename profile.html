@@ -83,6 +83,18 @@
     <form id="profileForm">
       <div class="field"><label data-i18n="lbl_name">Name</label><input type="text" id="pName" required></div>
       <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="pEmail" disabled></div>
+      <div class="field"><label data-i18n="lbl_phone">Phone number</label><input type="tel" id="pPhone"></div>
+      <div class="field"><label data-i18n="lbl_personal_email">Personal email (optional)</label><input type="email" id="pPersonalEmail"></div>
+      <div class="field"><label data-i18n="lbl_bio">About</label><textarea id="pBio" rows="3"></textarea></div>
+      <div class="field"><label data-i18n="lbl_website">Company website (optional)</label><input type="text" id="pWebsite"></div>
+      <div class="field"><label data-i18n="lbl_age_group">Age group</label>
+        <select id="pAgeGroup">
+          <option value="18-24">18–24</option>
+          <option value="25-34">25–34</option>
+          <option value="35-44">35–44</option>
+          <option value="45+">45+</option>
+        </select>
+      </div>
       <button type="submit" class="btn" data-i18n="btn_save">Save changes</button>
       <div class="form-msg" id="profileMsg"></div>
     </form>
@@ -108,6 +120,8 @@ function daysSince(dateStr){
 const I18N = {
   en: {
     back_link: "← Back to account", loading_text: "Loading...", lbl_name: "Name", lbl_email: "Email",
+    lbl_phone: "Phone number", lbl_personal_email: "Personal email (optional)", lbl_bio: "About",
+    lbl_website: "Company website (optional)", lbl_age_group: "Age group",
     btn_save: "Save changes", member_since: "Member since", login_link: "Log in", saved_msg: "✓ Saved.",
     must_login: "You need to log in first.",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
@@ -115,6 +129,8 @@ const I18N = {
   },
   ar: {
     back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lbl_name: "الاسم", lbl_email: "الإيميل",
+    lbl_phone: "رقم الهاتف", lbl_personal_email: "الإيميل الشخصي (اختياري)", lbl_bio: "نبذة",
+    lbl_website: "موقع الشركة (اختياري)", lbl_age_group: "الفئة العمرية",
     btn_save: "حفظ التعديلات", member_since: "عضو منذ", login_link: "تسجيل دخول", saved_msg: "✓ تم الحفظ.",
     must_login: "لازم تسجل دخول أولاً.",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
@@ -221,6 +237,11 @@ async function init(){
   document.getElementById('avatarLetter').textContent = name ? name.trim().charAt(0) : '?';
   document.getElementById('pName').value = name || '';
   document.getElementById('pEmail').value = currentUser.email;
+  document.getElementById('pPhone').value = (profile && profile.phone) || '';
+  document.getElementById('pPersonalEmail').value = (profile && profile.personal_email) || '';
+  document.getElementById('pBio').value = (profile && profile.bio) || '';
+  document.getElementById('pWebsite').value = (profile && profile.company_website) || '';
+  document.getElementById('pAgeGroup').value = (profile && profile.age_group) || '18-24';
 
   const joined = new Date(currentUser.created_at);
   const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
@@ -232,7 +253,14 @@ document.getElementById('profileForm').addEventListener('submit', async function
   const msg = document.getElementById('profileMsg');
   msg.style.display = 'block'; msg.className = 'form-msg'; msg.textContent = '...';
   const newName = document.getElementById('pName').value;
-  const { error } = await sb.from('profiles').update({ full_name: newName }).eq('id', currentUser.id);
+  const { error } = await sb.from('profiles').update({
+    full_name: newName,
+    phone: document.getElementById('pPhone').value,
+    personal_email: document.getElementById('pPersonalEmail').value,
+    bio: document.getElementById('pBio').value,
+    company_website: document.getElementById('pWebsite').value,
+    age_group: document.getElementById('pAgeGroup').value
+  }).eq('id', currentUser.id);
   if(error){ msg.className = 'form-msg err'; msg.textContent = error.message; return; }
   msg.className = 'form-msg ok'; msg.textContent = I18N[getLang()].saved_msg;
   document.getElementById('avatarLetter').textContent = newName.trim().charAt(0);

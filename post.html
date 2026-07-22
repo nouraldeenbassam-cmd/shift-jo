@@ -134,6 +134,17 @@
         <div class="field"><label data-i18n="lbl_name">Name</label><input type="text" id="signupName" required></div>
         <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="signupEmail" required></div>
         <div class="field"><label data-i18n="lbl_password">Password</label><input type="password" id="signupPassword" required minlength="6"></div>
+        <div class="field"><label data-i18n="lbl_age_group">Age group</label>
+          <select id="signupAgeGroup">
+            <option value="18-24">18–24</option>
+            <option value="25-34">25–34</option>
+            <option value="35-44">35–44</option>
+            <option value="45+">45+</option>
+          </select>
+        </div>
+        <div class="checks" style="margin-bottom:14px;">
+          <label><input type="checkbox" id="signupAgeConfirm" required><span data-i18n="age_confirm">I confirm I am 18 years old or older</span></label>
+        </div>
         <button type="submit" class="btn" data-i18n="btn_signup">Create account</button>
         <div class="form-msg" id="signupMsg"></div>
       </form>
@@ -227,6 +238,7 @@ const I18N = {
     back_link: "← Back to all shifts",
     tab_login: "Log in", tab_signup: "Sign up",
     lbl_email: "Email", lbl_password: "Password", lbl_name: "Name", lbl_new_password: "New password",
+    lbl_age_group: "Age group", age_confirm: "I confirm I am 18 years old or older",
     btn_login: "Log in", btn_signup: "Create account", btn_send_reset: "Send reset link", btn_save_password: "Save password",
     forgot_link: "Forgot your password?", back_to_login: "Back to log in",
     reset_hint: "Enter your email and we'll send you a link to set a new password.",
@@ -254,6 +266,7 @@ const I18N = {
     back_link: "← رجوع لكل الشواغر",
     tab_login: "تسجيل دخول", tab_signup: "حساب جديد",
     lbl_email: "الإيميل", lbl_password: "كلمة السر", lbl_name: "الاسم", lbl_new_password: "كلمة السر الجديدة",
+    lbl_age_group: "الفئة العمرية", age_confirm: "بأكد إني بعمر 18 سنة أو أكتر",
     btn_login: "تسجيل دخول", btn_signup: "إنشاء حساب", btn_send_reset: "إرسال رابط إعادة التعيين", btn_save_password: "حفظ كلمة السر",
     forgot_link: "نسيت كلمة السر؟", back_to_login: "رجوع لتسجيل الدخول",
     reset_hint: "اكتب إيميلك وبنبعتلك رابط لتعيين كلمة سر جديدة.",
@@ -378,9 +391,10 @@ document.getElementById('signupForm').addEventListener('submit', async function(
   const password = document.getElementById('signupPassword').value;
   const fullName = document.getElementById('signupName').value;
 
+  const ageGroup = document.getElementById('signupAgeGroup').value;
   const { data, error } = await sb.auth.signUp({
     email, password,
-    options: { data: { full_name: fullName }, emailRedirectTo: window.location.href }
+    options: { data: { full_name: fullName, age_group: ageGroup }, emailRedirectTo: window.location.href }
   });
 
   if(error){ msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message; return; }
@@ -483,7 +497,7 @@ async function loadSession(){
   if(!profile){
     const meta = currentUser.user_metadata || {};
     const { data: created } = await sb.from('profiles')
-      .upsert({ id: currentUser.id, full_name: meta.full_name || currentUser.email })
+      .upsert({ id: currentUser.id, full_name: meta.full_name || currentUser.email, age_group: meta.age_group || null })
       .select().single();
     profile = created;
   }
