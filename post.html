@@ -145,7 +145,10 @@
         <span id="whoName"></span>
       </div>
 
-      <h2 data-i18n="post_job_title">Post a job listing</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:2px;">
+        <h2 data-i18n="post_job_title" style="margin:0;">Post a job listing</h2>
+        <a href="saved.html" style="font-size:12px; color:var(--blue-dark); border:1px solid var(--border-strong); border-radius:8px; padding:6px 12px; text-decoration:none; font-weight:600; white-space:nowrap;" data-i18n="saved_jobs_link">❤️ Saved jobs</a>
+      </div>
       <div class="hint" data-i18n="post_job_hint">Your listing appears on the homepage for every visitor.</div>
       <form id="jobForm">
         <div class="field"><label data-i18n="lbl_job_title">Job title</label><input type="text" id="fTitle" required></div>
@@ -203,11 +206,6 @@
         <h2 data-i18n="my_jobs_title">Your listings</h2>
         <div id="myJobsList"></div>
       </div>
-
-      <div class="my-jobs">
-        <h2 data-i18n="saved_jobs_title">Saved jobs</h2>
-        <div id="savedJobsList"></div>
-      </div>
     </div>
 
   </div>
@@ -234,7 +232,7 @@ const I18N = {
     city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
     city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
     city_mafraq: "Mafraq", city_maan: "Ma'an",
-    my_jobs_title: "Your listings", saved_jobs_title: "Saved jobs",
+    my_jobs_title: "Your listings", saved_jobs_link: "❤️ Saved jobs",
     login_link: "Log in", no_listings: "You haven't posted anything yet.", no_saved: "No saved jobs yet.",
     delete_btn: "Delete", remove_btn: "Remove", details_link: "Details",
     renew_prompt: "posted {days} days ago — is it still open?", renew_btn: "Still open — renew 7 days", close_btn: "Filled — delete",
@@ -260,7 +258,7 @@ const I18N = {
     city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
     city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
     city_mafraq: "المفرق", city_maan: "معان",
-    my_jobs_title: "إعلاناتك المنشورة", saved_jobs_title: "الوظائف المحفوظة",
+    my_jobs_title: "إعلاناتك المنشورة", saved_jobs_link: "❤️ الوظائف المحفوظة",
     login_link: "تسجيل دخول", no_listings: "لسا ما نشرت أي إعلان.", no_saved: "ما فيه وظائف محفوظة لسا.",
     delete_btn: "حذف", remove_btn: "إزالة", details_link: "التفاصيل",
     renew_prompt: "مرق عليها {days} أيام — لسا متاحة الوظيفة؟", renew_btn: "لسا متاحة — جدد 7 أيام", close_btn: "خلص — احذف",
@@ -281,7 +279,7 @@ function applyLang(lang){
   });
   const btn = document.getElementById('langBtn');
   if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
-  if(currentUser){ loadMyJobs(); loadSavedJobs(); }
+  if(currentUser){ loadMyJobs(); }
 }
 
 async function setLang(lang){
@@ -485,7 +483,6 @@ async function loadSession(){
   document.getElementById('whoName').textContent = profile ? profile.full_name : currentUser.email;
 
   await loadMyJobs();
-  await loadSavedJobs();
 }
 
 document.getElementById('jobForm').addEventListener('submit', async function(e){
@@ -556,34 +553,6 @@ async function loadMyJobs(){
     btn.onclick = async () => {
       await sb.from('jobs').delete().eq('id', btn.dataset.id);
       await loadMyJobs();
-    };
-  });
-}
-
-async function loadSavedJobs(){
-  const t = I18N[getLang()];
-  const list = document.getElementById('savedJobsList');
-  const { data, error } = await sb.from('saved_jobs').select('job_id, jobs(*)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-  if(error || !data || data.length === 0){
-    list.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim);">${t.no_saved}</div>`;
-    return;
-  }
-  list.innerHTML = data.filter(r => r.jobs).map(r => `
-    <div class="my-job">
-      <div>
-        <div class="t" dir="auto">${r.jobs.title}</div>
-        <div class="c" dir="auto">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
-      </div>
-      <div style="display:flex; gap:6px;">
-        <a href="job.html?id=${r.job_id}" style="font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center;">${t.details_link}</a>
-        <button data-unsave="${r.job_id}">${t.remove_btn}</button>
-      </div>
-    </div>
-  `).join('');
-  list.querySelectorAll('button[data-unsave]').forEach(btn => {
-    btn.onclick = async () => {
-      await sb.from('saved_jobs').delete().eq('user_id', currentUser.id).eq('job_id', btn.dataset.unsave);
-      await loadSavedJobs();
     };
   });
 }

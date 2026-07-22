@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved jobs — Shift</title>
+<link rel="icon" type="image/svg+xml" href="shift-logo.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  :root{
+    --bg:#FAFAF8; --card:#FFFFFF; --border:#E5E3DC; --border-strong:#D3D1C7;
+    --text:#2C2C2A; --text-dim:#726F66; --blue:#378ADD; --blue-dark:#0C447C;
+    --green:#639922; --green-dark:#27500A; --coral:#D85A30;
+    --sans:'Tajawal', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:var(--sans); }
+  .wrap{ max-width:560px; margin:0 auto; padding:0 22px 90px; }
+
+  header{ padding:30px 0 22px; }
+  .brand{ display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .brand .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
+  .brand .name span{ color:var(--blue); }
+  .back-link{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--text-dim); text-decoration:none; }
+  .back-link:hover{ text-decoration:underline; }
+  h1{ font-size:20px; font-weight:800; margin-top:10px; }
+
+  .topbar{ position:sticky; top:0; z-index:50; background:var(--card); border-bottom:1px solid var(--border); }
+  .topbar-inner{ max-width:560px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; justify-content:space-between; }
+  .topbar-icons{ display:flex; align-items:center; gap:8px; }
+  .icon-btn{ position:relative; background:none; border:1px solid var(--border-strong); border-radius:8px; width:34px; height:34px; cursor:pointer; font-size:15px; color:var(--text); display:flex; align-items:center; justify-content:center; }
+  .bell-count{ display:none; position:absolute; top:-6px; left:-6px; background:var(--coral); color:#fff; font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; }
+  .gear-wrap{ position:relative; }
+  .gear-menu{ display:none; position:absolute; top:42px; left:0; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.08); min-width:170px; overflow:hidden; z-index:60; }
+  .gear-menu.open{ display:block; }
+  .gear-menu a, .gear-menu button{ display:block; width:100%; text-align:right; padding:10px 14px; font-size:13px; color:var(--text); text-decoration:none; background:none; border:none; cursor:pointer; font-family:var(--sans); }
+  .gear-menu a:hover, .gear-menu button:hover{ background:var(--bg); }
+  .gear-menu button{ color:var(--coral); border-top:1px solid var(--border); }
+  .login-link{ font-size:12.5px; color:var(--blue-dark); text-decoration:none; font-weight:600; }
+
+  .my-job{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .my-job .t{ font-size:13.5px; font-weight:600; }
+  .my-job .c{ font-size:11.5px; color:var(--text-dim); margin-top:2px; }
+  .my-job button, .my-job a.remove{ background:none; border:1px solid var(--coral); color:var(--coral); font-size:11.5px; padding:5px 12px; border-radius:6px; cursor:pointer; white-space:nowrap; text-decoration:none; font-weight:600; }
+  .my-job a.details{ font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center; }
+
+  .empty{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; border:1px dashed var(--border-strong); border-radius:12px; margin-top:16px; }
+  .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand"><img src="shift-logo.svg" alt="Shift" style="width:28px;height:28px;border-radius:8px;display:block;"><div class="name">شفت <span>/ Shift</span></div></a>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
+      <div class="topbar-icons" id="topbarIcons"></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <header>
+    <a href="post.html" class="back-link" data-i18n="back_link">← Back to account</a>
+    <h1 data-i18n="page_title">Saved jobs</h1>
+  </header>
+
+  <div id="loading" class="loading" data-i18n="loading_text">Loading...</div>
+  <div id="savedJobsList"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+
+const I18N = {
+  en: {
+    back_link: "← Back to account", page_title: "Saved jobs", loading_text: "Loading...",
+    no_saved: "No saved jobs yet.", details_link: "Details", remove_btn: "Remove",
+    gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
+    no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?",
+    login_link: "Log in", must_login: "You need to log in first."
+  },
+  ar: {
+    back_link: "← رجوع لصفحة الحساب", page_title: "الوظائف المحفوظة", loading_text: "جاري التحميل...",
+    no_saved: "ما فيه وظائف محفوظة لسا.", details_link: "التفاصيل", remove_btn: "إزالة",
+    gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
+    no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟",
+    login_link: "تسجيل دخول", must_login: "لازم تسجل دخول أولاً."
+  }
+};
+
+function getLang(){ return localStorage.getItem('shift_lang') || 'en'; }
+
+function applyLang(lang){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+}
+
+async function setLang(lang){
+  localStorage.setItem('shift_lang', lang);
+  if(currentUser){
+    await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
+  }
+  applyLang(lang);
+  if(currentUser) loadSavedJobs();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
+});
+
+function daysSince(dateStr){
+  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
+}
+
+async function renderTopbar(user){
+  const box = document.getElementById('topbarIcons');
+  const t = I18N[getLang()];
+  if(!user){
+    box.innerHTML = `<a href="post.html" class="login-link">${t.login_link}</a>`;
+    return;
+  }
+  const { data: myJobs } = await sb.from('jobs').select('id, title, renewed_at, created_at').eq('company_id', user.id);
+  const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
+  const notifHtml = stale.length === 0
+    ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
+    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+
+  box.innerHTML = `
+    <div class="gear-wrap">
+      <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${stale.length}</span></button>
+      <div id="notifMenu" class="gear-menu" style="min-width:240px;">${notifHtml}</div>
+    </div>
+    <div class="gear-wrap">
+      <button id="gearBtn" class="icon-btn" title="${t.account_title}">⚙️</button>
+      <div id="gearMenu" class="gear-menu">
+        <a href="profile.html">${t.gear_profile}</a>
+        <a href="settings.html">${t.gear_settings}</a>
+        <button id="logoutBtn">${t.gear_logout}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('bellCount').style.display = stale.length > 0 ? 'flex' : 'none';
+  const bellBtn = document.getElementById('bellBtn');
+  const notifMenu = document.getElementById('notifMenu');
+  const gearBtn = document.getElementById('gearBtn');
+  const gearMenu = document.getElementById('gearMenu');
+  bellBtn.onclick = (e) => { e.stopPropagation(); notifMenu.classList.toggle('open'); gearMenu.classList.remove('open'); };
+  gearBtn.onclick = (e) => { e.stopPropagation(); gearMenu.classList.toggle('open'); notifMenu.classList.remove('open'); };
+  document.addEventListener('click', () => { gearMenu.classList.remove('open'); notifMenu.classList.remove('open'); });
+  document.getElementById('logoutBtn').onclick = async () => {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  };
+}
+
+async function loadSavedJobs(){
+  const t = I18N[getLang()];
+  const list = document.getElementById('savedJobsList');
+  const { data, error } = await sb.from('saved_jobs').select('job_id, jobs(*)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if(error || !data || data.length === 0){
+    list.innerHTML = `<div class="empty">${t.no_saved}</div>`;
+    return;
+  }
+  list.innerHTML = data.filter(r => r.jobs).map(r => `
+    <div class="my-job">
+      <div>
+        <div class="t" dir="auto">${r.jobs.title}</div>
+        <div class="c" dir="auto">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <a href="job.html?id=${r.job_id}" class="details">${t.details_link}</a>
+        <button data-unsave="${r.job_id}">${t.remove_btn}</button>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('button[data-unsave]').forEach(btn => {
+    btn.onclick = async () => {
+      await sb.from('saved_jobs').delete().eq('user_id', currentUser.id).eq('job_id', btn.dataset.unsave);
+      await loadSavedJobs();
+    };
+  });
+}
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session ? session.user : null;
+
+  if(currentUser){
+    const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
+    if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);
+  }
+  applyLang(getLang());
+  await renderTopbar(currentUser);
+
+  if(!currentUser){
+    document.getElementById('loading').textContent = I18N[getLang()].must_login;
+    setTimeout(() => window.location.href = 'post.html', 1200);
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  await loadSavedJobs();
+}
+
+init();
+</script>
+</body>
+</html>
