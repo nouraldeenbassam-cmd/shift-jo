@@ -140,6 +140,12 @@ const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== i18n =====
+const CAT_KEY = { 'عمالة يدوية':'cat_manual', 'تقنية / IT':'cat_it', 'إداري / مكتبي':'cat_admin', 'ضيافة / مطاعم':'cat_hospitality', 'تعليم / تدريب':'cat_edu', 'تصميم / محتوى':'cat_design', 'أخرى':'cat_other' };
+const CITY_KEY = { 'عمّان':'city_amman', 'إربد':'city_irbid', 'البلقاء':'city_balqa', 'جرش':'city_jerash', 'الزرقاء':'city_zarqa', 'الطفيلة':'city_tafilah', 'عجلون':'city_ajloun', 'العقبة':'city_aqaba', 'الكرك':'city_karak', 'مادبا':'city_madaba', 'المفرق':'city_mafraq', 'معان':'city_maan' };
+function tCat(v, t){ return t[CAT_KEY[v]] || v; }
+function tCity(v, t){ return t[CITY_KEY[v]] || v; }
+function tUnit(v, t){ return v === 'ساعات' ? t.unit_hours : t.unit_days; }
+
 const I18N = {
   en: {
     hero_title: "Short-term shifts, anywhere",
@@ -151,7 +157,15 @@ const I18N = {
     call_now: "Call now", login_to_view: "Log in to view number", no_results: "No matching shifts — try different filters",
     login_link: "Log in", gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out",
     bell_title: "Notifications", account_title: "Account",
-    no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?"
+    no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?",
+    cat_manual: "Manual labor", cat_it: "Tech / IT", cat_admin: "Admin / Office", cat_hospitality: "Hospitality / Restaurants",
+    cat_edu: "Education / Training", cat_design: "Design / Content", cat_other: "Other",
+    unit_hours: "hours", unit_days: "days",
+    city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
+    city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
+    city_mafraq: "Mafraq", city_maan: "Ma'an",
+    badge_urgent: "Urgent", badge_skilled: "Requires certification",
+    bucket_1_3: "1-3 days", bucket_4_7: "4-7 days", bucket_8_14: "8-14 days", bucket_15_30: "15-30 days"
   },
   ar: {
     hero_title: "شواغر قصيرة المدة، بكل مكان",
@@ -163,7 +177,15 @@ const I18N = {
     call_now: "اتصل الآن", login_to_view: "سجل دخول لعرض الرقم", no_results: "ما فيه شواغر مطابقة — جرب تغيّر الفلتر",
     login_link: "تسجيل دخول", gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج",
     bell_title: "الإشعارات", account_title: "الحساب",
-    no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟"
+    no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟",
+    cat_manual: "عمالة يدوية", cat_it: "تقنية / IT", cat_admin: "إداري / مكتبي", cat_hospitality: "ضيافة / مطاعم",
+    cat_edu: "تعليم / تدريب", cat_design: "تصميم / محتوى", cat_other: "أخرى",
+    unit_hours: "ساعات", unit_days: "أيام",
+    city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
+    city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
+    city_mafraq: "المفرق", city_maan: "معان",
+    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة",
+    bucket_1_3: "1-3 أيام", bucket_4_7: "4-7 أيام", bucket_8_14: "8-14 يوم", bucket_15_30: "15-30 يوم"
   }
 };
 
@@ -263,9 +285,9 @@ function unique(arr){ return [...new Set(arr)]; }
 
 function populateFilters(){
   const t = I18N[getLang()];
-  filterCity.innerHTML = `<option value="">${t.filter_all_cities}</option>` + unique(jobs.map(j=>j.city)).map(c=>`<option value="${c}">${c}</option>`).join('');
-  filterDuration.innerHTML = `<option value="">${t.filter_all_durations}</option>` + ['1-3 أيام','4-7 أيام','8-14 يوم','15-30 يوم'].map(d=>`<option value="${d}">${d}</option>`).join('');
-  filterCategory.innerHTML = `<option value="">${t.filter_all_cats}</option>` + unique(jobs.map(j=>j.category)).map(c=>`<option value="${c}">${c}</option>`).join('');
+  filterCity.innerHTML = `<option value="">${t.filter_all_cities}</option>` + unique(jobs.map(j=>j.city)).map(c=>`<option value="${c}">${tCity(c, t)}</option>`).join('');
+  filterDuration.innerHTML = `<option value="">${t.filter_all_durations}</option>` + [['1-3 أيام',t.bucket_1_3],['4-7 أيام',t.bucket_4_7],['8-14 يوم',t.bucket_8_14],['15-30 يوم',t.bucket_15_30]].map(([v,label])=>`<option value="${v}">${label}</option>`).join('');
+  filterCategory.innerHTML = `<option value="">${t.filter_all_cats}</option>` + unique(jobs.map(j=>j.category)).map(c=>`<option value="${c}">${tCat(c, t)}</option>`).join('');
 }
 
 function render(){
@@ -294,17 +316,17 @@ function render(){
           <h3 dir="auto"><a href="job.html?id=${j.id}">${j.title}</a></h3>
           <div class="co" dir="auto">${j.company_name || ''}</div>
           <div class="badges">
-            <span class="badge dur">${j.duration} ${j.duration_unit || 'أيام'}</span>
-            <span class="badge cat">${j.category}</span>
-            ${j.urgent ? '<span class="badge urgent">عاجل</span>' : ''}
-            ${j.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
+            <span class="badge dur">${j.duration} ${tUnit(j.duration_unit || 'أيام', t)}</span>
+            <span class="badge cat">${tCat(j.category, t)}</span>
+            ${j.urgent ? `<span class="badge urgent">${t.badge_urgent}</span>` : ''}
+            ${j.skilled ? `<span class="badge skilled">${t.badge_skilled}</span>` : ''}
           </div>
         </div>
         <button class="save-btn ${savedIds.has(j.id) ? 'saved' : ''}" data-savejob="${j.id}" title="save">${savedIds.has(j.id) ? '❤️' : '🤍'}</button>
       </div>
       <div class="desc" dir="auto">${j.job_desc || ''}</div>
       <div class="bottom-row">
-        <span class="wage" dir="auto">${j.wage || '—'} · ${j.city}</span>
+        <span class="wage" dir="auto">${j.wage || '—'} · ${tCity(j.city, t)}</span>
         ${contactHtml(j)}
       </div>
     </div>

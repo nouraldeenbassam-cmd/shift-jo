@@ -94,6 +94,12 @@ const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const CAT_KEY = { 'عمالة يدوية':'cat_manual', 'تقنية / IT':'cat_it', 'إداري / مكتبي':'cat_admin', 'ضيافة / مطاعم':'cat_hospitality', 'تعليم / تدريب':'cat_edu', 'تصميم / محتوى':'cat_design', 'أخرى':'cat_other' };
+const CITY_KEY = { 'عمّان':'city_amman', 'إربد':'city_irbid', 'البلقاء':'city_balqa', 'جرش':'city_jerash', 'الزرقاء':'city_zarqa', 'الطفيلة':'city_tafilah', 'عجلون':'city_ajloun', 'العقبة':'city_aqaba', 'الكرك':'city_karak', 'مادبا':'city_madaba', 'المفرق':'city_mafraq', 'معان':'city_maan' };
+function tCat(v, t){ return t[CAT_KEY[v]] || v; }
+function tCity(v, t){ return t[CITY_KEY[v]] || v; }
+function tUnit(v, t){ return v === 'ساعات' ? t.unit_hours : t.unit_days; }
+
 const I18N = {
   en: {
     back_link: "← Back to all shifts", loading_text: "Loading...",
@@ -103,7 +109,14 @@ const I18N = {
     login_link: "Log in / Sign up", desc_empty: "No additional details.",
     workers_needed: "worker(s) needed",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
-    no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?"
+    no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?",
+    cat_manual: "Manual labor", cat_it: "Tech / IT", cat_admin: "Admin / Office", cat_hospitality: "Hospitality / Restaurants",
+    cat_edu: "Education / Training", cat_design: "Design / Content", cat_other: "Other",
+    unit_hours: "hours", unit_days: "days",
+    city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
+    city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
+    city_mafraq: "Mafraq", city_maan: "Ma'an",
+    badge_urgent: "Urgent", badge_skilled: "Requires certification"
   },
   ar: {
     back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
@@ -113,7 +126,14 @@ const I18N = {
     login_link: "تسجيل دخول / حساب جديد", desc_empty: "ما فيه تفاصيل إضافية.",
     workers_needed: "عامل مطلوب",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
-    no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟"
+    no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟",
+    cat_manual: "عمالة يدوية", cat_it: "تقنية / IT", cat_admin: "إداري / مكتبي", cat_hospitality: "ضيافة / مطاعم",
+    cat_edu: "تعليم / تدريب", cat_design: "تصميم / محتوى", cat_other: "أخرى",
+    unit_hours: "ساعات", unit_days: "أيام",
+    city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
+    city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
+    city_mafraq: "المفرق", city_maan: "معان",
+    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة"
   }
 };
 
@@ -254,13 +274,13 @@ function render(){
       <button class="save-btn ${isSaved ? 'saved' : ''}" id="saveBtn">${isSaved ? '❤️' : '🤍'}</button>
     </div>
     <div class="badges">
-      <span class="badge dur">${job.duration} ${job.duration_unit || 'أيام'}</span>
-      <span class="badge cat">${job.category}</span>
-      ${job.urgent ? '<span class="badge urgent">عاجل</span>' : ''}
-      ${job.skilled ? '<span class="badge skilled">يتطلب شهادة</span>' : ''}
+      <span class="badge dur">${job.duration} ${tUnit(job.duration_unit || 'أيام', t)}</span>
+      <span class="badge cat">${tCat(job.category, t)}</span>
+      ${job.urgent ? `<span class="badge urgent">${t.badge_urgent}</span>` : ''}
+      ${job.skilled ? `<span class="badge skilled">${t.badge_skilled}</span>` : ''}
     </div>
     <div class="wage" dir="auto">${job.wage || '—'}</div>
-    <div class="city" dir="auto">${job.city} · ${job.count || 1} ${t.workers_needed}</div>
+    <div class="city" dir="auto">${tCity(job.city, t)} · ${job.count || 1} ${t.workers_needed}</div>
     <div class="desc" dir="auto">${job.job_desc ? job.job_desc : `<span class="desc-empty">${t.desc_empty}</span>`}</div>
     ${contactHtml}
   `;

@@ -85,16 +85,25 @@ const I18N = {
     empty: "No notifications right now.", renew_prompt: "posted {days} days ago — still open?",
     renew_btn: "Still open — renew 7 days", close_btn: "Filled — delete",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
-    no_notifs: "No new notifications", login_link: "Log in", must_login: "You need to log in first."
+    no_notifs: "No new notifications", login_link: "Log in", must_login: "You need to log in first.",
+    city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
+    city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
+    city_mafraq: "Mafraq", city_maan: "Ma'an"
   },
   ar: {
     back_link: "← رجوع لصفحة الحساب", page_title: "الإشعارات", loading_text: "جاري التحميل...",
     empty: "ما فيه إشعارات هلأ.", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟",
     renew_btn: "لسا متاحة — جدد 7 أيام", close_btn: "خلص — احذف",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
-    no_notifs: "ما فيه إشعارات جديدة", login_link: "تسجيل دخول", must_login: "لازم تسجل دخول أولاً."
+    no_notifs: "ما فيه إشعارات جديدة", login_link: "تسجيل دخول", must_login: "لازم تسجل دخول أولاً.",
+    city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
+    city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
+    city_mafraq: "المفرق", city_maan: "معان"
   }
 };
+
+const CITY_KEY = { 'عمّان':'city_amman', 'إربد':'city_irbid', 'البلقاء':'city_balqa', 'جرش':'city_jerash', 'الزرقاء':'city_zarqa', 'الطفيلة':'city_tafilah', 'عجلون':'city_ajloun', 'العقبة':'city_aqaba', 'الكرك':'city_karak', 'مادبا':'city_madaba', 'المفرق':'city_mafraq', 'معان':'city_maan' };
+function tCity(v, t){ return t[CITY_KEY[v]] || v; }
 
 function getLang(){ return localStorage.getItem('shift_lang') || 'en'; }
 
@@ -181,7 +190,7 @@ async function loadNotifications(){
   list.innerHTML = stale.map(j => `
     <div class="notif-card">
       <div class="t" dir="auto">${j.title}</div>
-      <div class="c" dir="auto">${j.city} · ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</div>
+      <div class="c" dir="auto">${tCity(j.city, t)} · ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</div>
       <div class="notif-actions">
         <button class="btn-renew" data-renew="${j.id}">${t.renew_btn}</button>
         <button class="btn-close" data-close="${j.id}">${t.close_btn}</button>
