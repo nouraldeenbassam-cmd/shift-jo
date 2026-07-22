@@ -137,7 +137,7 @@ async function renderTopbar(user){
   const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
   const notifHtml = stale.length === 0
     ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
-    : stale.map(j => `<a href="notifications.html">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
   box.innerHTML = `
     <div class="gear-wrap">
@@ -180,8 +180,8 @@ async function loadNotifications(){
 
   list.innerHTML = stale.map(j => `
     <div class="notif-card">
-      <div class="t">${j.title}</div>
-      <div class="c">${j.city} · ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</div>
+      <div class="t" dir="auto">${j.title}</div>
+      <div class="c" dir="auto">${j.city} · ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</div>
       <div class="notif-actions">
         <button class="btn-renew" data-renew="${j.id}">${t.renew_btn}</button>
         <button class="btn-close" data-close="${j.id}">${t.close_btn}</button>

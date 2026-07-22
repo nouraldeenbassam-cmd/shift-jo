@@ -409,7 +409,7 @@ async function renderTopbar(user){
   const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
   const notifHtml = stale.length === 0
     ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
-    : stale.map(j => `<a href="notifications.html">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
   box.innerHTML = `
     <div class="gear-wrap">
@@ -545,8 +545,8 @@ async function loadMyJobs(){
   list.innerHTML = data.map(j => `
     <div class="my-job">
       <div>
-        <div class="t">${j.title}</div>
-        <div class="c">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'} · ${j.clicks || 0} ${t.applicants}</div>
+        <div class="t" dir="auto">${j.title}</div>
+        <div class="c" dir="auto">${j.city} · ${j.duration} ${j.duration_unit || 'أيام'} · ${j.clicks || 0} ${t.applicants}</div>
       </div>
       <button data-id="${j.id}">${t.delete_btn}</button>
     </div>
@@ -571,8 +571,8 @@ async function loadSavedJobs(){
   list.innerHTML = data.filter(r => r.jobs).map(r => `
     <div class="my-job">
       <div>
-        <div class="t">${r.jobs.title}</div>
-        <div class="c">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
+        <div class="t" dir="auto">${r.jobs.title}</div>
+        <div class="c" dir="auto">${r.jobs.company_name || ''} · ${r.jobs.city}</div>
       </div>
       <div style="display:flex; gap:6px;">
         <a href="job.html?id=${r.job_id}" style="font-size:11.5px; color:var(--blue-dark); text-decoration:underline; align-self:center;">${t.details_link}</a>

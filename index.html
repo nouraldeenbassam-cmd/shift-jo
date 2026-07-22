@@ -212,7 +212,7 @@ async function renderTopbar(user){
   const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
   const notifHtml = stale.length === 0
     ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
-    : stale.map(j => `<a href="notifications.html">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
   box.innerHTML = `
     <div class="gear-wrap">
@@ -286,8 +286,8 @@ function render(){
     <div class="job">
       <div class="top-row">
         <div>
-          <h3><a href="job.html?id=${j.id}">${j.title}</a></h3>
-          <div class="co">${j.company_name || ''}</div>
+          <h3 dir="auto"><a href="job.html?id=${j.id}">${j.title}</a></h3>
+          <div class="co" dir="auto">${j.company_name || ''}</div>
           <div class="badges">
             <span class="badge dur">${j.duration} ${j.duration_unit || 'أيام'}</span>
             <span class="badge cat">${j.category}</span>
@@ -297,9 +297,9 @@ function render(){
         </div>
         <button class="save-btn ${savedIds.has(j.id) ? 'saved' : ''}" data-savejob="${j.id}" title="save">${savedIds.has(j.id) ? '❤️' : '🤍'}</button>
       </div>
-      <div class="desc">${j.job_desc || ''}</div>
+      <div class="desc" dir="auto">${j.job_desc || ''}</div>
       <div class="bottom-row">
-        <span class="wage">${j.wage || '—'} · ${j.city}</span>
+        <span class="wage" dir="auto">${j.wage || '—'} · ${j.city}</span>
         ${contactHtml(j)}
       </div>
     </div>
