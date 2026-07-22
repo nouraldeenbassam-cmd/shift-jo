@@ -52,6 +52,8 @@
     padding:12px 20px; border-radius:10px; font-weight:700; font-size:14.5px; text-decoration:none;
   }
   .post-cta:hover{ background:var(--blue-dark); }
+  .post-cta.outline{ background:var(--card); color:var(--blue-dark); border:1px solid var(--border-strong); }
+  .post-cta.outline:hover{ background:var(--bg); }
 
   .board-head{ display:flex; justify-content:space-between; align-items:center; margin:32px 0 14px; flex-wrap:wrap; gap:10px; }
   .board-head h2{ font-size:17px; font-weight:700; }
@@ -112,7 +114,10 @@
       <div class="stat"><b id="statCats">0</b><span data-i18n="stat_cats">fields</span></div>
     </div>
 
-    <a href="post.html" class="post-cta" data-i18n="post_cta">+ Post a job listing</a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="post.html" class="post-cta" data-i18n="post_cta">+ Post a job listing</a>
+      <a href="saved.html" class="post-cta outline" data-i18n="saved_jobs_link">❤️ Saved jobs</a>
+    </div>
   </header>
 
   <div class="board-head">
@@ -140,7 +145,7 @@ const I18N = {
     hero_title: "Short-term shifts, anywhere",
     hero_lead: "From day labor to specialist tasks — post a request or find a shift that fits.",
     stat_jobs: "jobs available", stat_cities: "cities", stat_cats: "fields",
-    post_cta: "+ Post a job listing", board_title: "Available shifts",
+    post_cta: "+ Post a job listing", saved_jobs_link: "❤️ Saved jobs", board_title: "Available shifts",
     filter_all_cats: "All fields", filter_all_cities: "All cities", filter_all_durations: "All durations",
     footer_text: "Shift — temporary staffing platform",
     call_now: "Call now", login_to_view: "Log in to view number", no_results: "No matching shifts — try different filters",
@@ -152,7 +157,7 @@ const I18N = {
     hero_title: "شواغر قصيرة المدة، بكل مكان",
     hero_lead: "من عمالة يومية لمهام تخصصية — انشر طلبك أو دوّر شغلة تناسبك.",
     stat_jobs: "وظيفة متاحة", stat_cities: "مدينة", stat_cats: "مجال",
-    post_cta: "+ انشر إعلان عن وظيفة", board_title: "الشواغر المتاحة",
+    post_cta: "+ انشر إعلان عن وظيفة", saved_jobs_link: "❤️ الوظائف المحفوظة", board_title: "الشواغر المتاحة",
     filter_all_cats: "كل المجالات", filter_all_cities: "كل المدن", filter_all_durations: "كل المدد",
     footer_text: "شفت / Shift — منصة الشغل المؤقت",
     call_now: "اتصل الآن", login_to_view: "سجل دخول لعرض الرقم", no_results: "ما فيه شواغر مطابقة — جرب تغيّر الفلتر",
