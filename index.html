@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شفت — Shift</title>
+<title>يومي — Yaumee</title>
 <link rel="icon" type="image/svg+xml" href="shift-logo.svg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -96,7 +96,7 @@
 <body>
 <div class="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="brand"><img src="shift-logo.svg" alt="Shift" style="width:28px;height:28px;border-radius:8px;display:block;"><div class="name">شفت <span>/ Shift</span></div></a>
+    <a href="index.html" class="brand"><img src="shift-logo.svg" alt="Yaumee" style="width:28px;height:28px;border-radius:8px;display:block;"><div class="name">يومي <span>/ Yaumee</span></div></a>
     <div style="display:flex; align-items:center; gap:8px;">
       <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
       <div class="topbar-icons" id="topbarIcons"></div>
@@ -105,8 +105,8 @@
 </div>
 <div class="wrap">
   <header>
-    <h1 style="margin-top:22px;" data-i18n="hero_title">Short-term shifts, anywhere</h1>
-    <p class="lead" data-i18n="hero_lead">From day labor to specialist tasks — post a request or find a shift that fits.</p>
+    <h1 style="margin-top:22px;" data-i18n="hero_title">Short-term jobs, anywhere</h1>
+    <p class="lead" data-i18n="hero_lead">From day labor to specialist tasks — post a request or find a job that fits.</p>
 
     <div class="stat-row">
       <div class="stat"><b id="statJobs">0</b><span data-i18n="stat_jobs">jobs available</span></div>
@@ -121,7 +121,7 @@
   </header>
 
   <div class="board-head" style="flex-direction:column; align-items:stretch;">
-    <h2 data-i18n="board_title" style="margin-bottom:12px;">Available shifts</h2>
+    <h2 data-i18n="board_title" style="margin-bottom:12px;">Available jobs</h2>
     <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Search by job title..." style="width:100%; padding:11px 14px; border:1px solid var(--border-strong); border-radius:10px; font-family:var(--sans); font-size:14px; margin-bottom:12px; background:var(--card);">
     <div class="board-filters">
       <select id="filterCategory"><option value="" data-i18n="filter_all_cats">All fields</option></select>
@@ -131,7 +131,7 @@
   </div>
   <div class="job-list" id="jobList"></div>
 
-  <footer data-i18n="footer_text">Shift — temporary staffing platform</footer>
+  <footer data-i18n="footer_text">Yaumee — temporary staffing platform</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -155,14 +155,14 @@ function formatWage(j, t){
 
 const I18N = {
   en: {
-    hero_title: "Short-term shifts, anywhere",
-    hero_lead: "From day labor to specialist tasks — post a request or find a shift that fits.",
+    hero_title: "Short-term jobs, anywhere",
+    hero_lead: "From day labor to specialist tasks — post a request or find a job that fits.",
     stat_jobs: "jobs available", stat_cities: "cities", stat_cats: "fields",
-    post_cta: "+ Post a job listing", saved_jobs_link: "❤️ Saved jobs", board_title: "Available shifts",
+    post_cta: "+ Post a job listing", saved_jobs_link: "❤️ Saved jobs", board_title: "Available jobs",
     search_placeholder: "Search by job title...",
     filter_all_cats: "All fields", filter_all_cities: "All cities", filter_all_durations: "All durations",
-    footer_text: "Shift — temporary staffing platform",
-    call_now: "Call now", login_to_view: "Log in to view number", no_results: "No matching shifts — try different filters",
+    footer_text: "Yaumee — temporary staffing platform",
+    call_now: "Call now", login_to_view: "Log in to view number", no_results: "No matching jobs — try different filters",
     login_link: "Log in", gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out",
     bell_title: "Notifications", account_title: "Account",
     no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?",
@@ -183,7 +183,7 @@ const I18N = {
     post_cta: "+ انشر إعلان عن وظيفة", saved_jobs_link: "❤️ الوظائف المحفوظة", board_title: "الشواغر المتاحة",
     search_placeholder: "دوّر باسم الوظيفة...",
     filter_all_cats: "كل المجالات", filter_all_cities: "كل المدن", filter_all_durations: "كل المدد",
-    footer_text: "شفت / Shift — منصة الشغل المؤقت",
+    footer_text: "يومي / Yaumee — منصة الشغل المؤقت",
     call_now: "اتصل الآن", login_to_view: "سجل دخول لعرض الرقم", no_results: "ما فيه شواغر مطابقة — جرب تغيّر الفلتر",
     login_link: "تسجيل دخول", gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج",
     bell_title: "الإشعارات", account_title: "الحساب",
