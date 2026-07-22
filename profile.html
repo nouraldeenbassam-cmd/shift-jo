@@ -57,6 +57,11 @@
   .form-msg.err{ color:var(--coral); }
 
   .meta-row{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
+  .view-row{ text-align:right; padding:10px 0; border-bottom:1px solid var(--border); }
+  .view-row:last-of-type{ border-bottom:none; }
+  .view-label{ display:block; font-size:12px; color:var(--text-dim); margin-bottom:3px; }
+  .view-val{ display:block; font-size:14px; font-weight:600; word-break:break-word; }
+  .view-val:empty::after{ content:"—"; color:var(--text-dim); font-weight:400; }
 
   .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; }
 </style>
@@ -80,7 +85,19 @@
 
   <div class="panel" id="profileCard" style="display:none;">
     <div class="avatar" id="avatarLetter"></div>
-    <form id="profileForm">
+
+    <div id="profileView">
+      <div class="view-row"><span class="view-label" data-i18n="lbl_name">Name</span><span class="view-val" id="vName"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_email">Email</span><span class="view-val" id="vEmail"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_phone">Phone number</span><span class="view-val" id="vPhone"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_personal_email">Personal email (optional)</span><span class="view-val" id="vPersonalEmail"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_bio">About</span><span class="view-val" id="vBio"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_website">Company website (optional)</span><span class="view-val" id="vWebsite"></span></div>
+      <div class="view-row"><span class="view-label" data-i18n="lbl_age_group">Age group</span><span class="view-val" id="vAgeGroup"></span></div>
+      <button type="button" class="btn" id="editBtn" data-i18n="btn_edit" style="margin-top:14px;">Edit</button>
+    </div>
+
+    <form id="profileForm" style="display:none;">
       <div class="field"><label data-i18n="lbl_name">Name</label><input type="text" id="pName" required></div>
       <div class="field"><label data-i18n="lbl_email">Email</label><input type="email" id="pEmail" disabled></div>
       <div class="field"><label data-i18n="lbl_phone">Phone number</label><input type="tel" id="pPhone"></div>
@@ -96,6 +113,7 @@
         </select>
       </div>
       <button type="submit" class="btn" data-i18n="btn_save">Save changes</button>
+      <button type="button" class="btn" id="cancelBtn" style="background:none; border:1px solid var(--border-strong); color:var(--text-dim); margin-top:8px;" data-i18n="btn_cancel">Cancel</button>
       <div class="form-msg" id="profileMsg"></div>
     </form>
     <div class="meta-row">
@@ -112,6 +130,7 @@ const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
+let currentProfile = null;
 
 function daysSince(dateStr){
   return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
@@ -122,7 +141,7 @@ const I18N = {
     back_link: "← Back to account", loading_text: "Loading...", lbl_name: "Name", lbl_email: "Email",
     lbl_phone: "Phone number", lbl_personal_email: "Personal email (optional)", lbl_bio: "About",
     lbl_website: "Company website (optional)", lbl_age_group: "Age group",
-    btn_save: "Save changes", member_since: "Member since", login_link: "Log in", saved_msg: "✓ Saved.",
+    btn_save: "Save changes", btn_edit: "Edit", btn_cancel: "Cancel", member_since: "Member since", login_link: "Log in", saved_msg: "✓ Saved.",
     must_login: "You need to log in first.",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
     no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?"
@@ -131,7 +150,7 @@ const I18N = {
     back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lbl_name: "الاسم", lbl_email: "الإيميل",
     lbl_phone: "رقم الهاتف", lbl_personal_email: "الإيميل الشخصي (اختياري)", lbl_bio: "نبذة",
     lbl_website: "موقع الشركة (اختياري)", lbl_age_group: "الفئة العمرية",
-    btn_save: "حفظ التعديلات", member_since: "عضو منذ", login_link: "تسجيل دخول", saved_msg: "✓ تم الحفظ.",
+    btn_save: "حفظ التعديلات", btn_edit: "تعديل", btn_cancel: "إلغاء", member_since: "عضو منذ", login_link: "تسجيل دخول", saved_msg: "✓ تم الحفظ.",
     must_login: "لازم تسجل دخول أولاً.",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
     no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟"
@@ -233,37 +252,64 @@ async function init(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('profileCard').style.display = 'block';
 
-  const name = profile ? profile.full_name : currentUser.email;
-  document.getElementById('avatarLetter').textContent = name ? name.trim().charAt(0) : '?';
-  document.getElementById('pName').value = name || '';
-  document.getElementById('pEmail').value = currentUser.email;
-  document.getElementById('pPhone').value = (profile && profile.phone) || '';
-  document.getElementById('pPersonalEmail').value = (profile && profile.personal_email) || '';
-  document.getElementById('pBio').value = (profile && profile.bio) || '';
-  document.getElementById('pWebsite').value = (profile && profile.company_website) || '';
-  document.getElementById('pAgeGroup').value = (profile && profile.age_group) || '18-24';
+  currentProfile = profile;
+  renderView();
 
   const joined = new Date(currentUser.created_at);
   const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
   document.getElementById('joinDate').textContent = joined.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+const AGE_LABEL = { '18-24':'18–24', '25-34':'25–34', '35-44':'35–44', '45+':'45+' };
+
+function renderView(){
+  const p = currentProfile || {};
+  const name = p.full_name || currentUser.email;
+  document.getElementById('avatarLetter').textContent = name ? name.trim().charAt(0) : '?';
+  document.getElementById('vName').textContent = name || '';
+  document.getElementById('vEmail').textContent = currentUser.email;
+  document.getElementById('vPhone').textContent = p.phone || '';
+  document.getElementById('vPersonalEmail').textContent = p.personal_email || '';
+  document.getElementById('vBio').textContent = p.bio || '';
+  document.getElementById('vWebsite').textContent = p.company_website || '';
+  document.getElementById('vAgeGroup').textContent = p.age_group ? AGE_LABEL[p.age_group] : '';
+  document.getElementById('profileView').style.display = 'block';
+  document.getElementById('profileForm').style.display = 'none';
+}
+
+function showEditForm(){
+  const p = currentProfile || {};
+  document.getElementById('pName').value = p.full_name || currentUser.email;
+  document.getElementById('pEmail').value = currentUser.email;
+  document.getElementById('pPhone').value = p.phone || '';
+  document.getElementById('pPersonalEmail').value = p.personal_email || '';
+  document.getElementById('pBio').value = p.bio || '';
+  document.getElementById('pWebsite').value = p.company_website || '';
+  document.getElementById('pAgeGroup').value = p.age_group || '18-24';
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileForm').style.display = 'block';
+  document.getElementById('profileMsg').style.display = 'none';
+}
+
+document.getElementById('editBtn').onclick = showEditForm;
+document.getElementById('cancelBtn').onclick = renderView;
+
 document.getElementById('profileForm').addEventListener('submit', async function(e){
   e.preventDefault();
   const msg = document.getElementById('profileMsg');
   msg.style.display = 'block'; msg.className = 'form-msg'; msg.textContent = '...';
-  const newName = document.getElementById('pName').value;
-  const { error } = await sb.from('profiles').update({
-    full_name: newName,
+  const updated = {
+    full_name: document.getElementById('pName').value,
     phone: document.getElementById('pPhone').value,
     personal_email: document.getElementById('pPersonalEmail').value,
     bio: document.getElementById('pBio').value,
     company_website: document.getElementById('pWebsite').value,
     age_group: document.getElementById('pAgeGroup').value
-  }).eq('id', currentUser.id);
+  };
+  const { error } = await sb.from('profiles').update(updated).eq('id', currentUser.id);
   if(error){ msg.className = 'form-msg err'; msg.textContent = error.message; return; }
-  msg.className = 'form-msg ok'; msg.textContent = I18N[getLang()].saved_msg;
-  document.getElementById('avatarLetter').textContent = newName.trim().charAt(0);
+  currentProfile = { ...currentProfile, ...updated };
+  renderView();
 });
 
 init();
