@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>انشر إعلان — شفت / Shift</title>
+<link rel="icon" type="image/svg+xml" href="shift-logo.svg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
@@ -80,7 +81,7 @@
 <body>
 <div class="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="brand"><div class="mark">ش</div><div class="name">شفت <span>/ Shift</span></div></a>
+    <a href="index.html" class="brand"><img src="shift-logo.svg" alt="Shift" style="width:28px;height:28px;border-radius:8px;display:block;"><div class="name">شفت <span>/ Shift</span></div></a>
     <div style="display:flex; align-items:center; gap:8px;">
       <button id="langBtn" class="icon-btn" style="width:auto; padding:0 10px; font-size:12px; font-weight:700;">AR</button>
       <div class="topbar-icons" id="topbarIcons"></div>
@@ -238,6 +239,7 @@ const I18N = {
     delete_btn: "Delete", remove_btn: "Remove", details_link: "Details",
     renew_prompt: "posted {days} days ago — is it still open?", renew_btn: "Still open — renew 7 days", close_btn: "Filled — delete",
     applicants: "people clicked the number",
+    no_notifs: "No new notifications",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account"
   },
   ar: {
@@ -263,6 +265,7 @@ const I18N = {
     delete_btn: "حذف", remove_btn: "إزالة", details_link: "التفاصيل",
     renew_prompt: "مرق عليها {days} أيام — لسا متاحة الوظيفة؟", renew_btn: "لسا متاحة — جدد 7 أيام", close_btn: "خلص — احذف",
     applicants: "شخص ضغط على الرقم",
+    no_notifs: "ما فيه إشعارات جديدة",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب"
   }
 };
@@ -397,16 +400,22 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
 async function renderTopbar(user){
   const box = document.getElementById('topbarIcons');
+  const t = I18N[getLang()];
   if(!user){
-    box.innerHTML = `<a href="post.html" class="login-link">${I18N[getLang()].login_link}</a>`;
+    box.innerHTML = `<a href="post.html" class="login-link">${t.login_link}</a>`;
     return;
   }
-  const { data: myJobs } = await sb.from('jobs').select('renewed_at, created_at').eq('company_id', user.id);
-  const needsRenewal = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7).length;
+  const { data: myJobs } = await sb.from('jobs').select('id, title, renewed_at, created_at').eq('company_id', user.id);
+  const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
+  const notifHtml = stale.length === 0
+    ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
+    : stale.map(j => `<a href="notifications.html">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
-  const t = I18N[getLang()];
   box.innerHTML = `
-    <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${needsRenewal}</span></button>
+    <div class="gear-wrap">
+      <button id="bellBtn" class="icon-btn" title="${t.bell_title}">🔔<span id="bellCount" class="bell-count">${stale.length}</span></button>
+      <div id="notifMenu" class="gear-menu" style="min-width:240px;">${notifHtml}</div>
+    </div>
     <div class="gear-wrap">
       <button id="gearBtn" class="icon-btn" title="${t.account_title}">⚙️</button>
       <div id="gearMenu" class="gear-menu">
@@ -416,16 +425,15 @@ async function renderTopbar(user){
       </div>
     </div>
   `;
-  document.getElementById('bellCount').style.display = needsRenewal > 0 ? 'flex' : 'none';
+  document.getElementById('bellCount').style.display = stale.length > 0 ? 'flex' : 'none';
 
-  document.getElementById('bellBtn').onclick = () => {
-    const section = document.getElementById('myJobsSection');
-    if(section) section.scrollIntoView({ behavior: 'smooth' });
-  };
+  const bellBtn = document.getElementById('bellBtn');
+  const notifMenu = document.getElementById('notifMenu');
   const gearBtn = document.getElementById('gearBtn');
   const gearMenu = document.getElementById('gearMenu');
-  gearBtn.onclick = (e) => { e.stopPropagation(); gearMenu.classList.toggle('open'); };
-  document.addEventListener('click', () => gearMenu.classList.remove('open'));
+  bellBtn.onclick = (e) => { e.stopPropagation(); notifMenu.classList.toggle('open'); gearMenu.classList.remove('open'); };
+  gearBtn.onclick = (e) => { e.stopPropagation(); gearMenu.classList.toggle('open'); notifMenu.classList.remove('open'); };
+  document.addEventListener('click', () => { gearMenu.classList.remove('open'); notifMenu.classList.remove('open'); });
   document.getElementById('logoutBtn').onclick = async () => {
     await sb.auth.signOut();
     window.location.href = 'index.html';
@@ -534,22 +542,7 @@ async function loadMyJobs(){
     bellCount.style.display = 'none';
   }
 
-  list.innerHTML = data.map(j => {
-    const age = daysSince(j.renewed_at || j.created_at);
-    if(age >= 7){
-      return `
-        <div class="my-job" data-jobid="${j.id}" style="flex-direction:column; align-items:stretch; border-color:var(--coral); background:#FFF8F5;">
-          <div style="margin-bottom:8px;">
-            <div class="t">${j.title}</div>
-            <div class="c">${j.city} · ${t.renew_prompt.replace('{days}', Math.floor(age))}</div>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <button data-renew="${j.id}" style="flex:1; background:var(--green); color:#fff; border:none; padding:7px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">${t.renew_btn}</button>
-            <button data-id="${j.id}" style="flex:1; background:none; border:1px solid var(--coral); color:var(--coral);">${t.close_btn}</button>
-          </div>
-        </div>`;
-    }
-    return `
+  list.innerHTML = data.map(j => `
     <div class="my-job">
       <div>
         <div class="t">${j.title}</div>
@@ -557,15 +550,8 @@ async function loadMyJobs(){
       </div>
       <button data-id="${j.id}">${t.delete_btn}</button>
     </div>
-  `;
-  }).join('');
+  `).join('');
 
-  list.querySelectorAll('button[data-renew]').forEach(btn => {
-    btn.onclick = async () => {
-      await sb.from('jobs').update({ renewed_at: new Date().toISOString() }).eq('id', btn.dataset.renew);
-      await loadMyJobs();
-    };
-  });
   list.querySelectorAll('button[data-id]').forEach(btn => {
     btn.onclick = async () => {
       await sb.from('jobs').delete().eq('id', btn.dataset.id);
