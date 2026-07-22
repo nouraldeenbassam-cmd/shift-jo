@@ -101,15 +101,9 @@ function tCity(v, t){ return t[CITY_KEY[v]] || v; }
 function tUnit(v, t){ return v === 'ساعات' ? t.unit_hours : t.unit_days; }
 function formatWage(j, t){
   if(!j.wage || Number(j.wage) <= 0) return '—';
-  const daysEq = j.duration_unit === 'ساعات' ? j.duration / 24 : j.duration;
-  const total = Number(j.wage) * daysEq;
-  const totalStr = Number.isInteger(total) ? total : total.toFixed(2);
-  const base = `${j.wage} ${t.currency}${t.per_day}`;
-  if(daysEq > 1){
-    const unitLabel = tUnit(j.duration_unit || 'أيام', t);
-    return `${base} (${t.total_label.replace('{n}', j.duration).replace('{unit}', unitLabel)} ${totalStr} ${t.currency})`;
-  }
-  return base;
+  return j.wage_type === 'total'
+    ? `${j.wage} ${t.currency} ${t.wage_total_suffix}`
+    : `${j.wage} ${t.currency}${t.per_day}`;
 }
 
 const I18N = {
@@ -128,7 +122,7 @@ const I18N = {
     city_amman: "Amman", city_irbid: "Irbid", city_balqa: "Balqa", city_jerash: "Jerash", city_zarqa: "Zarqa",
     city_tafilah: "Tafilah", city_ajloun: "Ajloun", city_aqaba: "Aqaba", city_karak: "Karak", city_madaba: "Madaba",
     city_mafraq: "Mafraq", city_maan: "Ma'an",
-    badge_urgent: "Urgent", badge_skilled: "Requires certification", currency: "JOD", per_day: "/day", total_label: "total for {n} {unit}:"
+    badge_urgent: "Urgent", badge_skilled: "Requires certification", currency: "JOD", per_day: "/day", wage_total_suffix: "total"
   },
   ar: {
     back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
@@ -145,7 +139,7 @@ const I18N = {
     city_amman: "عمّان", city_irbid: "إربد", city_balqa: "البلقاء", city_jerash: "جرش", city_zarqa: "الزرقاء",
     city_tafilah: "الطفيلة", city_ajloun: "عجلون", city_aqaba: "العقبة", city_karak: "الكرك", city_madaba: "مادبا",
     city_mafraq: "المفرق", city_maan: "معان",
-    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة", currency: "دينار", per_day: "/يوم", total_label: "الإجمالي لمدة {n} {unit}:"
+    badge_urgent: "عاجل", badge_skilled: "يتطلب شهادة", currency: "دينار", per_day: "/يوم", wage_total_suffix: "إجمالي"
   }
 };
 

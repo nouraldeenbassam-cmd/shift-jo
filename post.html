@@ -188,7 +188,15 @@
           </div>
         </div>
         <div class="field"><label data-i18n="lbl_count">Workers needed</label><input type="number" id="fCount" min="1" value="1"></div>
-        <div class="field"><label data-i18n="lbl_wage">Daily wage (approx.)</label><input type="number" id="fWage" min="0" step="0.5"></div>
+        <div class="field"><label data-i18n="lbl_wage">Wage</label>
+          <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <input type="number" id="fWage" min="0" step="0.5">
+            <select id="fWageType">
+              <option value="daily" selected data-i18n="wage_daily">Daily wage</option>
+              <option value="total" data-i18n="wage_total">Total wage</option>
+            </select>
+          </div>
+        </div>
         <div class="field"><label data-i18n="lbl_phone">Contact number</label><input type="tel" id="fPhone" required></div>
         <div class="field"><label data-i18n="lbl_details">Additional details</label><textarea id="fDesc"></textarea></div>
         <div class="checks">
@@ -225,7 +233,8 @@ const I18N = {
     new_pw_title: "Set a new password", new_pw_hint: "Enter a new password for your account.",
     post_job_title: "Post a job listing", post_job_hint: "Your listing appears on the homepage for every visitor.",
     lbl_job_title: "Job title", lbl_category: "Category", lbl_duration: "Duration", lbl_city: "City",
-    lbl_count: "Workers needed", lbl_wage: "Daily wage (approx.)", lbl_phone: "Contact number", lbl_details: "Additional details",
+    lbl_count: "Workers needed", lbl_wage: "Wage", lbl_phone: "Contact number", lbl_details: "Additional details",
+    wage_daily: "Daily wage", wage_total: "Total wage",
     chk_urgent: "Urgent", chk_skilled: "Requires certification", btn_post: "Post listing",
     cat_manual: "Manual labor", cat_it: "Tech / IT", cat_admin: "Admin / Office", cat_hospitality: "Hospitality / Restaurants",
     cat_edu: "Education / Training", cat_design: "Design / Content", cat_other: "Other",
@@ -251,7 +260,8 @@ const I18N = {
     new_pw_title: "تعيين كلمة سر جديدة", new_pw_hint: "اكتب كلمة السر الجديدة لحسابك.",
     post_job_title: "انشر طلب عمال", post_job_hint: "طلبك بيظهر مباشرة بالصفحة الرئيسية لكل الزوار.",
     lbl_job_title: "عنوان الوظيفة", lbl_category: "المجال", lbl_duration: "المدة", lbl_city: "المدينة",
-    lbl_count: "عدد العمال المطلوب", lbl_wage: "الأجر اليومي (تقريبي)", lbl_phone: "رقم التواصل", lbl_details: "تفاصيل إضافية",
+    lbl_count: "عدد العمال المطلوب", lbl_wage: "الأجر", lbl_phone: "رقم التواصل", lbl_details: "تفاصيل إضافية",
+    wage_daily: "أجر يومي", wage_total: "أجر إجمالي",
     chk_urgent: "مستعجل", chk_skilled: "يتطلب شهادة/تخصص", btn_post: "انشر الطلب",
     cat_manual: "عمالة يدوية", cat_it: "تقنية / IT", cat_admin: "إداري / مكتبي", cat_hospitality: "ضيافة / مطاعم",
     cat_edu: "تعليم / تدريب", cat_design: "تصميم / محتوى", cat_other: "أخرى",
@@ -501,6 +511,7 @@ document.getElementById('jobForm').addEventListener('submit', async function(e){
     city: document.getElementById('fCity').value,
     count: document.getElementById('fCount').value || 1,
     wage: document.getElementById('fWage').value,
+    wage_type: document.getElementById('fWageType').value,
     phone: document.getElementById('fPhone').value,
     job_desc: document.getElementById('fDesc').value,
     urgent: document.getElementById('fUrgent').checked,
@@ -512,6 +523,7 @@ document.getElementById('jobForm').addEventListener('submit', async function(e){
   msg.className='form-msg ok'; msg.textContent = '✓ تم نشر الوظيفة بنجاح.';
   this.reset();
   document.getElementById('fDurationNum').value = '1';
+  document.getElementById('fWageType').value = 'daily';
   document.getElementById('fDurationUnit').value = 'أيام';
   document.getElementById('fCount').value = '1';
   await loadMyJobs();
