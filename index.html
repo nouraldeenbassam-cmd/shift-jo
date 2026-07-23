@@ -359,8 +359,7 @@ function render(){
   jobList.querySelectorAll('a[data-jobid]').forEach(link => {
     link.addEventListener('click', async () => {
       const id = link.dataset.jobid;
-      const jobObj = jobs.find(x => x.id == id);
-      await sb.from('jobs').update({ clicks: (jobObj.clicks || 0) + 1 }).eq('id', id);
+      await sb.rpc('increment_job_clicks', { job_id: id });
     });
   });
 
