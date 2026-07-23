@@ -140,6 +140,10 @@ const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 // ===== i18n =====
 const CAT_KEY = { 'عمالة يدوية':'cat_manual', 'تقنية / IT':'cat_it', 'إداري / مكتبي':'cat_admin', 'ضيافة / مطاعم':'cat_hospitality', 'تعليم / تدريب':'cat_edu', 'تصميم / محتوى':'cat_design', 'أخرى':'cat_other' };
 const CITY_KEY = { 'عمّان':'city_amman', 'إربد':'city_irbid', 'البلقاء':'city_balqa', 'جرش':'city_jerash', 'الزرقاء':'city_zarqa', 'الطفيلة':'city_tafilah', 'عجلون':'city_ajloun', 'العقبة':'city_aqaba', 'الكرك':'city_karak', 'مادبا':'city_madaba', 'المفرق':'city_mafraq', 'معان':'city_maan' };
@@ -254,7 +258,7 @@ async function renderTopbar(user){
   const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
   const notifHtml = stale.length === 0
     ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
-    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+    : stale.map(j => `<a href="notifications.html" dir="auto">${escapeHtml(j.title)} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
   box.innerHTML = `
     <div class="gear-wrap">
@@ -333,8 +337,8 @@ function render(){
     <div class="job">
       <div class="top-row">
         <div>
-          <h3 dir="auto"><a href="job.html?id=${j.id}">${j.title}</a></h3>
-          <div class="co" dir="auto">${j.company_name || ''}</div>
+          <h3 dir="auto"><a href="job.html?id=${j.id}">${escapeHtml(j.title)}</a></h3>
+          <a class="co" dir="auto" href="company.html?id=${j.company_id}" style="text-decoration:none;">${escapeHtml(j.company_name || '')}</a>
           <div class="badges">
             <span class="badge dur">${j.duration} ${tUnit(j.duration_unit || 'أيام', t)}</span>
             <span class="badge cat">${tCat(j.category, t)}</span>
@@ -344,7 +348,7 @@ function render(){
         </div>
         <button class="save-btn ${savedIds.has(j.id) ? 'saved' : ''}" data-savejob="${j.id}" title="save">${savedIds.has(j.id) ? '❤️' : '🤍'}</button>
       </div>
-      <div class="desc" dir="auto">${j.job_desc || ''}</div>
+      <div class="desc" dir="auto">${escapeHtml(j.job_desc || '')}</div>
       <div class="bottom-row">
         <span class="wage" dir="auto">${formatWage(j, t)} · ${tCity(j.city, t)}</span>
         ${contactHtml(j)}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Settings — Yaumee</title>
+<title>صفحة الشركة — يومي / Yaumee</title>
 <link rel="icon" type="image/svg+xml" href="shift-logo.svg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -19,7 +19,6 @@
 
   header{ padding:30px 0 22px; }
   .brand{ display:flex; align-items:center; gap:8px; text-decoration:none; }
-  .brand .mark{ width:28px; height:28px; border-radius:8px; background:var(--blue); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:14px; }
   .brand .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
   .brand .name span{ color:var(--blue); }
   .back-link{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--text-dim); text-decoration:none; }
@@ -38,16 +37,21 @@
   .gear-menu button{ color:var(--coral); border-top:1px solid var(--border); }
   .login-link{ font-size:12.5px; color:var(--blue-dark); text-decoration:none; font-weight:600; }
 
-  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; }
-  .panel h2{ font-size:16px; font-weight:700; margin-bottom:4px; }
-  .panel .hint{ color:var(--text-dim); font-size:12.5px; margin-bottom:16px; }
+  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; text-align:center; }
+  .avatar{ width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-size:26px; font-weight:900; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+  .cname{ font-size:19px; font-weight:800; }
+  .cbio{ margin-top:10px; font-size:13.5px; color:var(--text); line-height:1.7; }
+  .cwebsite{ margin-top:10px; font-size:13px; }
+  .cwebsite a{ color:var(--blue); text-decoration:none; }
+  .cwebsite a:hover{ text-decoration:underline; }
+  .meta-row{ margin-top:18px; padding-top:16px; border-top:1px solid var(--border); font-size:12.5px; color:var(--text-dim); }
 
-  .lang-options{ display:flex; gap:10px; }
-  .lang-opt{ flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:14px; text-align:center; cursor:pointer; font-weight:600; font-size:14px; }
-  .lang-opt.active{ border-color:var(--blue); background:rgba(55,138,221,0.08); color:var(--blue-dark); }
-
-  .form-msg{ font-size:12px; margin-top:12px; display:none; font-weight:500; }
-  .form-msg.ok{ color:var(--green-dark); }
+  .section-title{ font-size:13px; font-weight:700; color:var(--text-dim); margin:26px 0 10px; text-align:right; }
+  .job-item{ display:block; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:8px; text-decoration:none; color:var(--text); text-align:right; }
+  .job-item:hover{ border-color:var(--border-strong); }
+  .job-item .jt{ font-weight:700; font-size:14px; }
+  .job-item .jm{ font-size:12px; color:var(--text-dim); margin-top:3px; }
+  .empty-jobs{ text-align:center; color:var(--text-dim); font-size:13px; padding:16px; }
 
   .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px; }
 </style>
@@ -64,19 +68,22 @@
 </div>
 <div class="wrap">
   <header>
-    <a href="post.html" class="back-link" data-i18n="back_link">← Back to account</a>
+    <a href="index.html" class="back-link" data-i18n="back_link">← Back to all jobs</a>
   </header>
 
   <div id="loading" class="loading" data-i18n="loading_text">Loading...</div>
 
-  <div class="panel" id="settingsCard" style="display:none;">
-    <h2 data-i18n="lang_title">Site language</h2>
-    <div class="hint" data-i18n="lang_hint">This preference is saved to your account and applies wherever you log in.</div>
-    <div class="lang-options">
-      <div class="lang-opt" id="optEn" data-i18n="opt_en">English</div>
-      <div class="lang-opt" id="optAr" data-i18n="opt_ar">العربية</div>
+  <div id="companyCard" style="display:none;">
+    <div class="panel">
+      <div class="avatar" id="avatarLetter"></div>
+      <div class="cname" id="cName" dir="auto"></div>
+      <div class="cbio" id="cBio" dir="auto"></div>
+      <div class="cwebsite" id="cWebsite" dir="auto"></div>
+      <div class="meta-row"><span id="joinDate"></span> · <span data-i18n="member_since">Member since</span></div>
     </div>
-    <div class="form-msg" id="settingsMsg"></div>
+
+    <div class="section-title" data-i18n="open_jobs">Open positions</div>
+    <div id="jobsList"></div>
   </div>
 </div>
 
@@ -90,22 +97,24 @@ function escapeHtml(str){
   return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-let currentUser = null;
+function daysSince(dateStr){
+  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
+}
 
 const I18N = {
   en: {
-    back_link: "← Back to account", loading_text: "Loading...", lang_title: "Site language",
-    lang_hint: "This preference is saved to your account and applies wherever you log in.",
-    opt_en: "English", opt_ar: "العربية", saved_msg: "✓ Saved.", login_link: "Log in",
-    must_login: "You need to log in first.",
+    back_link: "← Back to all jobs", loading_text: "Loading...",
+    not_found: "This company profile isn't available.", no_link: "No valid company link.",
+    member_since: "Member since", open_jobs: "Open positions", no_open_jobs: "No open positions right now.",
+    login_link: "Log in / Sign up",
     gear_profile: "Profile", gear_settings: "Settings", gear_logout: "Log out", bell_title: "Notifications", account_title: "Account",
     no_notifs: "No new notifications", renew_prompt: "posted {days} days ago — still open?"
   },
   ar: {
-    back_link: "← رجوع لصفحة الحساب", loading_text: "جاري التحميل...", lang_title: "لغة الموقع",
-    lang_hint: "هالإعداد بينحفظ بحسابك وبينطبق أي ما سجلت دخول.",
-    opt_en: "English", opt_ar: "العربية", saved_msg: "✓ تم الحفظ.", login_link: "تسجيل دخول",
-    must_login: "لازم تسجل دخول أولاً.",
+    back_link: "← رجوع لكل الشواغر", loading_text: "جاري التحميل...",
+    not_found: "بروفايل هاي الشركة مش متاح.", no_link: "ما فيه رابط شركة صحيح.",
+    member_since: "عضو منذ", open_jobs: "الشواغر المتاحة", no_open_jobs: "ما فيه شواغر متاحة حالياً.",
+    login_link: "تسجيل دخول / حساب جديد",
     gear_profile: "الصفحة الشخصية", gear_settings: "الإعدادات", gear_logout: "تسجيل خروج", bell_title: "الإشعارات", account_title: "الحساب",
     no_notifs: "ما فيه إشعارات جديدة", renew_prompt: "مرق عليها {days} أيام — لسا متاحة؟"
   }
@@ -122,29 +131,20 @@ function applyLang(lang){
   });
   const btn = document.getElementById('langBtn');
   if(btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
-  document.getElementById('optEn').classList.toggle('active', lang === 'en');
-  document.getElementById('optAr').classList.toggle('active', lang === 'ar');
+  if(company) render();
 }
 
 async function setLang(lang){
   localStorage.setItem('shift_lang', lang);
   if(currentUser){
     await sb.from('profiles').update({ lang }).eq('id', currentUser.id);
-    const msg = document.getElementById('settingsMsg');
-    msg.style.display = 'block'; msg.className = 'form-msg ok'; msg.textContent = I18N[lang].saved_msg;
   }
   applyLang(lang);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('langBtn').onclick = () => setLang(getLang() === 'ar' ? 'en' : 'ar');
-  document.getElementById('optEn').onclick = () => setLang('en');
-  document.getElementById('optAr').onclick = () => setLang('ar');
 });
-
-function daysSince(dateStr){
-  return (Date.now() - new Date(dateStr).getTime()) / (1000*60*60*24);
-}
 
 async function renderTopbar(user){
   const box = document.getElementById('topbarIcons');
@@ -183,9 +183,16 @@ async function renderTopbar(user){
   document.addEventListener('click', () => { gearMenu.classList.remove('open'); notifMenu.classList.remove('open'); });
   document.getElementById('logoutBtn').onclick = async () => {
     await sb.auth.signOut();
-    window.location.href = 'index.html';
+    window.location.reload();
   };
 }
+
+const params = new URLSearchParams(window.location.search);
+const companyId = params.get('id');
+
+let currentUser = null;
+let company = null;
+let openJobs = [];
 
 async function init(){
   const { data: { session } } = await sb.auth.getSession();
@@ -198,16 +205,59 @@ async function init(){
   applyLang(getLang());
   await renderTopbar(currentUser);
 
-  document.getElementById('loading').style.display = 'none';
-
-  if(!currentUser){
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('loading').textContent = I18N[getLang()].must_login;
-    setTimeout(() => window.location.href = 'post.html', 1200);
+  if(!companyId){
+    document.getElementById('loading').textContent = I18N[getLang()].no_link;
     return;
   }
 
-  document.getElementById('settingsCard').style.display = 'block';
+  const { data, error } = await sb.from('profiles_public').select('*').eq('id', companyId).single();
+  if(error || !data){
+    document.getElementById('loading').textContent = I18N[getLang()].not_found;
+    return;
+  }
+  company = data;
+
+  const { data: jobsData } = await sb.from('jobs').select('id, title, city, wage, wage_type').eq('company_id', companyId).order('created_at', { ascending: false });
+  openJobs = jobsData || [];
+
+  render();
+}
+
+function render(){
+  const t = I18N[getLang()];
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('companyCard').style.display = 'block';
+
+  const name = company.full_name || '—';
+  document.getElementById('avatarLetter').textContent = name ? name.trim().charAt(0) : '?';
+  document.getElementById('cName').textContent = name;
+  document.getElementById('cBio').textContent = company.bio || '';
+  document.getElementById('cBio').style.display = company.bio ? 'block' : 'none';
+
+  const websiteBox = document.getElementById('cWebsite');
+  if(company.company_website){
+    const url = /^https?:\/\//.test(company.company_website) ? company.company_website : `https://${company.company_website}`;
+    websiteBox.innerHTML = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(company.company_website)}</a>`;
+    websiteBox.style.display = 'block';
+  } else {
+    websiteBox.style.display = 'none';
+  }
+
+  const joined = new Date(company.created_at);
+  const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
+  document.getElementById('joinDate').textContent = joined.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const jobsList = document.getElementById('jobsList');
+  if(openJobs.length === 0){
+    jobsList.innerHTML = `<div class="empty-jobs">${t.no_open_jobs}</div>`;
+  } else {
+    jobsList.innerHTML = openJobs.map(j => `
+      <a class="job-item" href="job.html?id=${j.id}">
+        <div class="jt" dir="auto">${escapeHtml(j.title)}</div>
+        <div class="jm" dir="auto">${escapeHtml(j.city || '')}</div>
+      </a>
+    `).join('');
+  }
 }
 
 init();

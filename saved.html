@@ -74,6 +74,10 @@ const SUPABASE_URL = "https://mkmynymssnvcinbdiqmr.supabase.co";
 const SUPABASE_KEY = "sb_publishable_48UUMnF_UL_FPQkPeR0hOQ_rrtd7k33";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 let currentUser = null;
 
 const I18N = {
@@ -143,7 +147,7 @@ async function renderTopbar(user){
   const stale = (myJobs || []).filter(j => daysSince(j.renewed_at || j.created_at) >= 7);
   const notifHtml = stale.length === 0
     ? `<div style="padding:14px; font-size:12.5px; color:var(--text-dim);">${t.no_notifs}</div>`
-    : stale.map(j => `<a href="notifications.html" dir="auto">${j.title} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
+    : stale.map(j => `<a href="notifications.html" dir="auto">${escapeHtml(j.title)} — ${t.renew_prompt.replace('{days}', Math.floor(daysSince(j.renewed_at || j.created_at)))}</a>`).join('');
 
   box.innerHTML = `
     <div class="gear-wrap">
@@ -184,8 +188,8 @@ async function loadSavedJobs(){
   list.innerHTML = data.filter(r => r.jobs).map(r => `
     <div class="my-job">
       <div>
-        <div class="t" dir="auto">${r.jobs.title}</div>
-        <div class="c" dir="auto">${r.jobs.company_name || ''} · ${tCity(r.jobs.city, t)}</div>
+        <div class="t" dir="auto">${escapeHtml(r.jobs.title)}</div>
+        <div class="c" dir="auto">${escapeHtml(r.jobs.company_name || '')} · ${tCity(r.jobs.city, t)}</div>
       </div>
       <div style="display:flex; gap:6px;">
         <a href="job.html?id=${r.job_id}" class="details">${t.details_link}</a>
