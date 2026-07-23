@@ -398,7 +398,7 @@ document.getElementById('signupForm').addEventListener('submit', async function(
   const ageGroup = document.getElementById('signupAgeGroup').value;
   const { data, error } = await sb.auth.signUp({
     email, password,
-    options: { data: { full_name: fullName, age_group: ageGroup }, emailRedirectTo: window.location.href }
+    options: { data: { full_name: fullName, age_group: ageGroup }, emailRedirectTo: new URL('index.html', window.location.href).href }
   });
 
   if(error){ msg.className='form-msg err'; msg.textContent = 'صار خطأ: ' + error.message; return; }
@@ -422,7 +422,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     return;
   }
   msg.style.display='none';
-  await loadSession();
+  window.location.href = 'index.html';
 });
 
 async function renderTopbar(user){
@@ -477,12 +477,14 @@ async function loadSession(){
     document.getElementById('newPasswordForm').style.display = 'block';
     const { data: { session } } = await sb.auth.getSession();
     currentUser = session ? session.user : null;
+    document.getElementById('langBtn').style.display = currentUser ? 'none' : '';
     await renderTopbar(currentUser);
     return;
   }
 
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  document.getElementById('langBtn').style.display = currentUser ? 'none' : '';
   if(currentUser){
     const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
     if(profile && profile.lang) localStorage.setItem('shift_lang', profile.lang);

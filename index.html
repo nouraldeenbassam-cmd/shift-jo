@@ -384,6 +384,7 @@ function render(){
 async function loadJobs(){
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  document.getElementById('langBtn').style.display = currentUser ? 'none' : '';
 
   if(currentUser){
     const { data: profile } = await sb.from('profiles').select('lang').eq('id', currentUser.id).single();
